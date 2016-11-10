@@ -7,10 +7,10 @@ Subject: get sev by name
  1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/netcat.c b/netcat.c
-index a95d30d..a85cef0 100644
+index 52c0702..27ed9f2 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -957,12 +957,19 @@ atelnet(int nfd, unsigned char *buf, unsigned int size)
+@@ -963,12 +963,19 @@ atelnet(int nfd, unsigned char *buf, unsigned int size)
  void
  build_ports(char *p)
  {

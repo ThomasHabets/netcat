@@ -3,11 +3,11 @@ Date: Mon, 13 Feb 2012 15:38:15 +0800
 Subject: verbose numeric port
 
 ---
- netcat.c | 20 ++++++++++++++++----
- 1 file changed, 16 insertions(+), 4 deletions(-)
+ netcat.c | 19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index 939a969..050d319 100644
+index 9c2e0d6..11ca9be 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -41,6 +41,7 @@
@@ -18,7 +18,7 @@ index 939a969..050d319 100644
  
  #ifndef IPTOS_LOWDELAY
  # define IPTOS_LOWDELAY 0x10
-@@ -417,6 +418,18 @@ main(int argc, char *argv[])
+@@ -421,6 +422,18 @@ main(int argc, char *argv[])
  				s = local_listen(host, uport, hints);
  			if (s < 0)
  				err(1, NULL);
@@ -37,7 +37,7 @@ index 939a969..050d319 100644
  			/*
  			 * For UDP and -k, don't connect the socket, let it
  			 * receive datagrams from multiple socket pairs.
-@@ -431,14 +444,14 @@ main(int argc, char *argv[])
+@@ -437,14 +450,14 @@ main(int argc, char *argv[])
  				char buf[16384];
  				struct sockaddr_storage z;
  

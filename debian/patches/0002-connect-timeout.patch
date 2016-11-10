@@ -7,7 +7,7 @@ Subject: connect timeout
  1 file changed, 75 insertions(+), 2 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index 56dadce..a95d30d 100644
+index cdcd646..52c0702 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -106,6 +106,10 @@
@@ -21,7 +21,7 @@ index 56dadce..a95d30d 100644
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
  unsigned int iflag;				/* Interval Flag */
-@@ -151,6 +155,9 @@ int	map_tos(char *, int *);
+@@ -152,6 +156,9 @@ int	map_tos(char *, int *);
  void	report_connect(const struct sockaddr *, socklen_t);
  void	usage(int);
  
@@ -31,7 +31,7 @@ index 56dadce..a95d30d 100644
  int
  main(int argc, char *argv[])
  {
-@@ -659,11 +666,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -664,11 +671,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  
  		set_common_sockopts(s);
  
@@ -48,7 +48,7 @@ index 56dadce..a95d30d 100644
  
  		close(s);
  		s = -1;
-@@ -711,6 +721,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
+@@ -716,6 +726,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
  	return (ret);
  }
  

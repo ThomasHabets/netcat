@@ -23,15 +23,15 @@ index 96a6587..becd854 100644
  CFLAGS=  -g -O2
  LDFLAGS=  -Wl,--no-add-needed
 diff --git a/nc.1 b/nc.1
-index 64d8495..abed6dd 100644
+index 5fb7254..667ee68 100644
 --- a/nc.1
 +++ b/nc.1
 @@ -34,7 +34,7 @@
  .Sh SYNOPSIS
  .Nm nc
  .Bk -words
--.Op Fl 46CDdhklnrStUuvZz
-+.Op Fl 46bCDdhklnrStUuvZz
+-.Op Fl 46CDdhklNnrStUuvZz
++.Op Fl 46bCDdhklNnrStUuvZz
  .Op Fl I Ar length
  .Op Fl i Ar interval
  .Op Fl O Ar length
@@ -44,7 +44,7 @@ index 64d8495..abed6dd 100644
  .It Fl C
  Send CRLF as line-ending.
  .It Fl D
-@@ -327,6 +329,54 @@ and which side is being used as a
+@@ -331,6 +333,54 @@ and which side is being used as a
  The connection may be terminated using an
  .Dv EOF
  .Pq Sq ^D .
@@ -99,7 +99,7 @@ index 64d8495..abed6dd 100644
  .Sh DATA TRANSFER
  The example in the previous section can be expanded to build a
  basic data transfer model.
-@@ -386,15 +436,30 @@ The
+@@ -390,15 +440,30 @@ The
  flag can be used to tell
  .Nm
  to report open ports,
@@ -133,10 +133,10 @@ index 64d8495..abed6dd 100644
  .Pp
  Alternatively, it might be useful to know which server software
  is running, and which versions.
-@@ -459,6 +524,9 @@ Original implementation by *Hobbit*
+@@ -463,6 +528,9 @@ Original implementation by *Hobbit*
  .br
  Rewritten with IPv6 support by
- .An Eric Jackson Aq ericj@monkey.org .
+ .An Eric Jackson Aq Mt ericj@monkey.org .
 +.br
 +Modified for Debian port by Aron Xu
 +.Aq aron@debian.org .
@@ -144,7 +144,7 @@ index 64d8495..abed6dd 100644
  UDP port scans using the
  .Fl uz
 diff --git a/netcat.c b/netcat.c
-index 0799794..b72802e 100644
+index 924c040..ea7f8c5 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -88,6 +88,7 @@
@@ -163,7 +163,7 @@ index 0799794..b72802e 100644
  int     Cflag = 0;                              /* CRLF line-ending */
  int	dflag;					/* detached, no stdin */
  unsigned int iflag;				/* Interval Flag */
-@@ -145,7 +147,7 @@ char *portlist[PORT_MAX+1];
+@@ -146,7 +148,7 @@ char *portlist[PORT_MAX+1];
  char *unix_dg_tmp_socket;
  
  void	atelnet(int, unsigned char *, unsigned int);
@@ -172,7 +172,7 @@ index 0799794..b72802e 100644
  void	help(void);
  int	local_listen(char *, char *, struct addrinfo);
  void	readwrite(int);
-@@ -171,11 +173,14 @@ int
+@@ -172,11 +174,14 @@ int
  main(int argc, char *argv[])
  {
  	int ch, s, ret, socksv;
@@ -189,16 +189,16 @@ index 0799794..b72802e 100644
  	char *proxy = NULL;
  	const char *errstr, *proxyhost = "", *proxyport = NULL;
  	struct addrinfo proxyhints;
-@@ -189,7 +194,7 @@ main(int argc, char *argv[])
+@@ -190,7 +195,7 @@ main(int argc, char *argv[])
  	sv = NULL;
  
  	while ((ch = getopt(argc, argv,
--	    "46CDdhI:i:klnO:P:p:q:rSs:tT:UuV:vw:X:x:Zz")) != -1) {
-+	    "46bCDdhI:i:klnO:P:p:q:rSs:tT:UuV:vw:X:x:Zz")) != -1) {
+-	    "46CDdhI:i:klNnO:P:p:q:rSs:tT:UuV:vw:X:x:Zz")) != -1) {
++	    "46bCDdhI:i:klNnO:P:p:q:rSs:tT:UuV:vw:X:x:Zz")) != -1) {
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -197,6 +202,13 @@ main(int argc, char *argv[])
+@@ -198,6 +203,13 @@ main(int argc, char *argv[])
  		case '6':
  			family = AF_INET6;
  			break;
@@ -212,7 +212,7 @@ index 0799794..b72802e 100644
  		case 'U':
  			family = AF_UNIX;
  			break;
-@@ -335,35 +347,40 @@ main(int argc, char *argv[])
+@@ -339,35 +351,40 @@ main(int argc, char *argv[])
  
  	/* Cruft to make sure options are clean, and used properly. */
  	if (argv[0] && !argv[1] && family == AF_UNIX) {
@@ -270,7 +270,7 @@ index 0799794..b72802e 100644
  
  	/* Get name of temporary socket for unix datagram client */
  	if ((family == AF_UNIX) && uflag && !lflag) {
-@@ -441,7 +458,7 @@ main(int argc, char *argv[])
+@@ -445,7 +462,7 @@ main(int argc, char *argv[])
  			else
  				s = unix_listen(host);
  		} else
@@ -279,7 +279,7 @@ index 0799794..b72802e 100644
  		if (s < 0)
  			err(1, NULL);
  
-@@ -450,7 +467,8 @@ main(int argc, char *argv[])
+@@ -454,7 +471,8 @@ main(int argc, char *argv[])
  			local = ":::";
  		else
  			local = "0.0.0.0";
@@ -289,7 +289,7 @@ index 0799794..b72802e 100644
  			host ?: local,
  			family,
  			*uport);
-@@ -609,6 +627,8 @@ unix_bind(char *path)
+@@ -615,6 +633,8 @@ unix_bind(char *path)
  		return (-1);
  	}
  
@@ -298,7 +298,7 @@ index 0799794..b72802e 100644
  	if (bind(s, (struct sockaddr *)&sun, SUN_LEN(&sun)) < 0) {
  		close(s);
  		return (-1);
-@@ -630,8 +650,10 @@ unix_connect(char *path)
+@@ -636,8 +656,10 @@ unix_connect(char *path)
  		if ((s = unix_bind(unix_dg_tmp_socket)) < 0)
  			return (-1);
  	} else {
@@ -308,9 +308,9 @@ index 0799794..b72802e 100644
  			return (-1);
 +                }
  	}
- 	(void)fcntl(s, F_SETFD, 1);
+ 	(void)fcntl(s, F_SETFD, FD_CLOEXEC);
  
-@@ -642,9 +664,11 @@ unix_connect(char *path)
+@@ -648,9 +670,11 @@ unix_connect(char *path)
  	    sizeof(sun.sun_path)) {
  		close(s);
  		errno = ENAMETOOLONG;
@@ -322,7 +322,7 @@ index 0799794..b72802e 100644
  		close(s);
  		return (-1);
  	}
-@@ -1073,22 +1097,23 @@ atelnet(int nfd, unsigned char *buf, unsigned int size)
+@@ -1080,22 +1104,23 @@ atelnet(int nfd, unsigned char *buf, unsigned int size)
   * that we should try to connect to.
   */
  void
@@ -349,7 +349,7 @@ index 0799794..b72802e 100644
  		*n = '\0';
  		n++;
  
-@@ -1096,9 +1121,9 @@ build_ports(char *p)
+@@ -1103,9 +1128,9 @@ build_ports(char *p)
  		hi = strtonum(n, 1, PORT_MAX, &errstr);
  		if (errstr)
  			errx(1, "port number %s: %s", errstr, n);
@@ -361,7 +361,7 @@ index 0799794..b72802e 100644
  
  		if (lo > hi) {
  			cp = hi;
-@@ -1128,10 +1153,12 @@ build_ports(char *p)
+@@ -1135,10 +1160,12 @@ build_ports(char *p)
  			}
  		}
  	} else {
@@ -377,7 +377,7 @@ index 0799794..b72802e 100644
  		if (portlist[0] == NULL)
  			err(1, NULL);
  	}
-@@ -1166,6 +1193,13 @@ set_common_sockopts(int s)
+@@ -1173,6 +1200,13 @@ set_common_sockopts(int s)
  {
  	int x = 1;
  
@@ -391,7 +391,7 @@ index 0799794..b72802e 100644
  # if defined(TCP_MD5SIG)
  	if (Sflag) {
  		if (setsockopt(s, IPPROTO_TCP, TCP_MD5SIG,
-@@ -1280,6 +1314,7 @@ help(void)
+@@ -1287,6 +1321,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\

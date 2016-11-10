@@ -36,10 +36,10 @@ index 150f829..96a6587 100644
 +clean:
 +	rm -f $(OBJS) nc
 diff --git a/nc.1 b/nc.1
-index 232b6f5..3460fa6 100644
+index 4c2a055..dce9eab 100644
 --- a/nc.1
 +++ b/nc.1
-@@ -150,9 +150,6 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
+@@ -154,9 +154,6 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -49,7 +49,7 @@ index 232b6f5..3460fa6 100644
  .It Fl r
  Specifies that source and/or destination ports should be chosen randomly
  instead of sequentially within a range or in the order that the system
-@@ -174,6 +171,7 @@ Change IPv4 TOS value.
+@@ -178,6 +175,7 @@ Change IPv4 TOS value.
  may be one of
  .Ar critical ,
  .Ar inetcontrol ,
@@ -58,7 +58,7 @@ index 232b6f5..3460fa6 100644
  .Ar netcontrol ,
  .Ar throughput ,
 diff --git a/netcat.c b/netcat.c
-index a034bba..56dadce 100644
+index 571de9a..cdcd646 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -42,6 +42,46 @@
@@ -117,7 +117,7 @@ index a034bba..56dadce 100644
  #include "atomicio.h"
  
  #ifndef SUN_LEN
-@@ -118,7 +160,7 @@ main(int argc, char *argv[])
+@@ -119,7 +161,7 @@ main(int argc, char *argv[])
  	struct servent *sv;
  	socklen_t len;
  	struct sockaddr_storage cliaddr;
@@ -126,7 +126,7 @@ index a034bba..56dadce 100644
  	const char *errstr, *proxyhost = "", *proxyport = NULL;
  	struct addrinfo proxyhints;
  	char unix_dg_tmp_socket_buf[UNIX_DG_TMP_SOCKET_SIZE];
-@@ -191,10 +233,14 @@ main(int argc, char *argv[])
+@@ -195,10 +237,14 @@ main(int argc, char *argv[])
  			uflag = 1;
  			break;
  		case 'V':
@@ -141,7 +141,7 @@ index a034bba..56dadce 100644
  			break;
  		case 'v':
  			vflag = 1;
-@@ -229,7 +275,11 @@ main(int argc, char *argv[])
+@@ -233,7 +279,11 @@ main(int argc, char *argv[])
  				    errstr, optarg);
  			break;
  		case 'S':
@@ -153,7 +153,7 @@ index a034bba..56dadce 100644
  			break;
  		case 'T':
  			errstr = NULL;
-@@ -256,6 +306,15 @@ main(int argc, char *argv[])
+@@ -260,6 +310,15 @@ main(int argc, char *argv[])
  	if (argv[0] && !argv[1] && family == AF_UNIX) {
  		host = argv[0];
  		uport = NULL;
@@ -169,7 +169,7 @@ index a034bba..56dadce 100644
  	} else if (argv[0] && !argv[1]) {
  		if  (!lflag)
  			usage(1);
-@@ -267,14 +326,7 @@ main(int argc, char *argv[])
+@@ -271,14 +330,7 @@ main(int argc, char *argv[])
  	} else
  		usage(1);
  
@@ -185,7 +185,7 @@ index a034bba..56dadce 100644
  
  	/* Get name of temporary socket for unix datagram client */
  	if ((family == AF_UNIX) && uflag && !lflag) {
-@@ -283,8 +335,8 @@ main(int argc, char *argv[])
+@@ -287,8 +339,8 @@ main(int argc, char *argv[])
  		} else {
  			strlcpy(unix_dg_tmp_socket_buf, "/tmp/nc.XXXXXXXXXX",
  				UNIX_DG_TMP_SOCKET_SIZE);
@@ -196,7 +196,7 @@ index a034bba..56dadce 100644
  			unix_dg_tmp_socket = unix_dg_tmp_socket_buf;
  		}
  	}
-@@ -575,18 +627,22 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -580,18 +632,22 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  		    res0->ai_protocol)) < 0)
  			continue;
  
@@ -219,7 +219,7 @@ index a034bba..56dadce 100644
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res0->ai_family;
  			ahints.ai_socktype = uflag ? SOCK_DGRAM : SOCK_STREAM;
-@@ -686,15 +742,23 @@ local_listen(char *host, char *port, struct addrinfo hints)
+@@ -691,15 +747,23 @@ local_listen(char *host, char *port, struct addrinfo hints)
  		    res0->ai_protocol)) < 0)
  			continue;
  
@@ -243,7 +243,7 @@ index a034bba..56dadce 100644
  
  		set_common_sockopts(s);
  
-@@ -898,11 +962,13 @@ set_common_sockopts(int s)
+@@ -904,11 +968,13 @@ set_common_sockopts(int s)
  {
  	int x = 1;
  
@@ -257,7 +257,7 @@ index a034bba..56dadce 100644
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
-@@ -956,6 +1022,7 @@ map_tos(char *s, int *val)
+@@ -962,6 +1028,7 @@ map_tos(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -265,7 +265,7 @@ index a034bba..56dadce 100644
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -1002,6 +1069,9 @@ report_connect(const struct sockaddr *sa, socklen_t salen)
+@@ -1008,6 +1075,9 @@ report_connect(const struct sockaddr *sa, socklen_t salen)
  void
  help(void)
  {
@@ -275,7 +275,7 @@ index a034bba..56dadce 100644
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -1031,7 +1101,7 @@ help(void)
+@@ -1038,7 +1108,7 @@ help(void)
  	\t-x addr[:port]\tSpecify proxy address and port\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
@@ -284,10 +284,10 @@ index a034bba..56dadce 100644
  }
  
  void
-@@ -1039,7 +1109,7 @@ usage(int ret)
+@@ -1046,7 +1116,7 @@ usage(int ret)
  {
  	fprintf(stderr,
- 	    "usage: nc [-46DdhklnrStUuvz] [-I length] [-i interval] [-O length]\n"
+ 	    "usage: nc [-46DdhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
 -	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T ToS]\n"
 +	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T toskeyword]\n"
  	    "\t  [-V rtable] [-w timeout] [-X proxy_protocol]\n"
