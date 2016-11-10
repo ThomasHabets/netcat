@@ -8,7 +8,7 @@ Subject: quit timer
  2 files changed, 38 insertions(+), 5 deletions(-)
 
 diff --git a/nc.1 b/nc.1
-index 48deab8..3225bfc 100644
+index 9374dc5..ca355c2 100644
 --- a/nc.1
 +++ b/nc.1
 @@ -40,6 +40,7 @@
@@ -19,7 +19,7 @@ index 48deab8..3225bfc 100644
  .Op Fl s Ar source
  .Op Fl T Ar toskeyword
  .Op Fl V Ar rtable
-@@ -156,6 +157,10 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
+@@ -171,6 +172,10 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -31,10 +31,10 @@ index 48deab8..3225bfc 100644
  Specifies that source and/or destination ports should be chosen randomly
  instead of sequentially within a range or in the order that the system
 diff --git a/netcat.c b/netcat.c
-index 65cb5b0..8f4bbe8 100644
+index e2f7802..7a7114d 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -86,6 +86,7 @@
+@@ -87,6 +87,7 @@
  #include <errno.h>
  #include <netdb.h>
  #include <poll.h>
@@ -42,7 +42,7 @@ index 65cb5b0..8f4bbe8 100644
  #include <stdarg.h>
  #include <stdio.h>
  #include <stdlib.h>
-@@ -120,6 +121,7 @@ int	Nflag;					/* shutdown() network socket */
+@@ -122,6 +123,7 @@ int	Nflag;					/* shutdown() network socket */
  int	nflag;					/* Don't do name look up */
  char   *Pflag;					/* Proxy username */
  char   *pflag;					/* Localport flag */
@@ -50,7 +50,7 @@ index 65cb5b0..8f4bbe8 100644
  int	rflag;					/* Random ports flag */
  char   *sflag;					/* Source Address */
  int	tflag;					/* Telnet Emulation */
-@@ -159,6 +161,7 @@ void	usage(int);
+@@ -162,6 +164,7 @@ void	usage(int);
  
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
@@ -58,16 +58,16 @@ index 65cb5b0..8f4bbe8 100644
  
  int
  main(int argc, char *argv[])
-@@ -182,7 +185,7 @@ main(int argc, char *argv[])
- 	sv = NULL;
+@@ -188,7 +191,7 @@ main(int argc, char *argv[])
+ # endif
  
  	while ((ch = getopt(argc, argv,
--	    "46CDdhI:i:klNnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
-+	    "46CDdhI:i:klNnO:P:p:q:rSs:tT:UuV:vw:X:x:z")) != -1) {
+-	    "46CDdFhI:i:klNnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
++	    "46CDdFhI:i:klNnO:P:p:q:rSs:tT:UuV:vw:X:x:z")) != -1) {
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -232,6 +235,11 @@ main(int argc, char *argv[])
+@@ -241,6 +244,11 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -79,7 +79,7 @@ index 65cb5b0..8f4bbe8 100644
  		case 'r':
  			rflag = 1;
  			break;
-@@ -937,10 +945,19 @@ readwrite(int nfd)
+@@ -944,10 +952,19 @@ readwrite(int nfd)
  			}
  			else if (pfd[1].revents & POLLHUP) {
  			shutdown_wr:
@@ -101,7 +101,7 @@ index 65cb5b0..8f4bbe8 100644
  			}
  		}
  	}
-@@ -1197,6 +1214,7 @@ help(void)
+@@ -1265,6 +1282,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -109,10 +109,10 @@ index 65cb5b0..8f4bbe8 100644
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s addr\t	Local source address\n\
-@@ -1219,9 +1237,19 @@ usage(int ret)
+@@ -1287,9 +1305,19 @@ usage(int ret)
  {
  	fprintf(stderr,
- 	    "usage: nc [-46CDdhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
+ 	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
 -	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T toskeyword]\n"
 -	    "\t  [-V rtable] [-w timeout] [-X proxy_protocol]\n"
 +	    "\t  [-P proxy_username] [-p source_port] [-q seconds] [-s source]\n"

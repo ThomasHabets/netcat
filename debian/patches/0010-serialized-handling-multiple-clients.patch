@@ -7,10 +7,10 @@ Subject: serialized handling multiple clients
  1 file changed, 19 insertions(+), 20 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index 332123b..924c040 100644
+index 207e3b1..1bb5b03 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -444,26 +444,24 @@ main(int argc, char *argv[])
+@@ -453,26 +453,24 @@ main(int argc, char *argv[])
  				s = unix_bind(host);
  			else
  				s = unix_listen(host);
@@ -51,7 +51,7 @@ index 332123b..924c040 100644
  			/*
  			 * For UDP and -k, don't connect the socket, let it
  			 * receive datagrams from multiple socket pairs.
-@@ -510,15 +508,16 @@ main(int argc, char *argv[])
+@@ -519,15 +517,16 @@ main(int argc, char *argv[])
  				close(connfd);
  			}
  

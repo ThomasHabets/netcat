@@ -3,11 +3,11 @@ Date: Mon, 13 Feb 2012 15:59:31 +0800
 Subject: port to linux with libsd
 
 ---
- Makefile | 17 ++++++++++--
+ Makefile | 17 +++++++++--
  nc.1     |  4 +--
- netcat.c | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++++++---------
- socks.c  | 46 +++++++++++++++----------------
- 4 files changed, 122 insertions(+), 41 deletions(-)
+ netcat.c | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++++++---------
+ socks.c  | 46 +++++++++++++++---------------
+ 4 files changed, 124 insertions(+), 41 deletions(-)
 
 diff --git a/Makefile b/Makefile
 index 150f829..96a6587 100644
@@ -36,10 +36,10 @@ index 150f829..96a6587 100644
 +clean:
 +	rm -f $(OBJS) nc
 diff --git a/nc.1 b/nc.1
-index 4c2a055..dce9eab 100644
+index b8dd179..daec9c5 100644
 --- a/nc.1
 +++ b/nc.1
-@@ -154,9 +154,6 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
+@@ -169,9 +169,6 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -49,7 +49,7 @@ index 4c2a055..dce9eab 100644
  .It Fl r
  Specifies that source and/or destination ports should be chosen randomly
  instead of sequentially within a range or in the order that the system
-@@ -178,6 +175,7 @@ Change IPv4 TOS value.
+@@ -193,6 +190,7 @@ Change IPv4 TOS value.
  may be one of
  .Ar critical ,
  .Ar inetcontrol ,
@@ -58,10 +58,10 @@ index 4c2a055..dce9eab 100644
  .Ar netcontrol ,
  .Ar throughput ,
 diff --git a/netcat.c b/netcat.c
-index 571de9a..cdcd646 100644
+index 2211508..619a5a0 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -42,6 +42,46 @@
+@@ -43,6 +43,46 @@
  #include <netinet/ip.h>
  #include <arpa/telnet.h>
  
@@ -108,7 +108,7 @@ index 571de9a..cdcd646 100644
  #include <err.h>
  #include <errno.h>
  #include <netdb.h>
-@@ -53,6 +93,8 @@
+@@ -54,6 +94,8 @@
  #include <unistd.h>
  #include <fcntl.h>
  #include <limits.h>
@@ -117,7 +117,7 @@ index 571de9a..cdcd646 100644
  #include "atomicio.h"
  
  #ifndef SUN_LEN
-@@ -119,7 +161,7 @@ main(int argc, char *argv[])
+@@ -122,7 +164,7 @@ main(int argc, char *argv[])
  	struct servent *sv;
  	socklen_t len;
  	struct sockaddr_storage cliaddr;
@@ -126,12 +126,22 @@ index 571de9a..cdcd646 100644
  	const char *errstr, *proxyhost = "", *proxyport = NULL;
  	struct addrinfo proxyhints;
  	char unix_dg_tmp_socket_buf[UNIX_DG_TMP_SOCKET_SIZE];
-@@ -195,10 +237,14 @@ main(int argc, char *argv[])
+@@ -133,7 +175,9 @@ main(int argc, char *argv[])
+ 	host = NULL;
+ 	uport = NULL;
+ 	sv = NULL;
++# if defined(RT_TABLEID_MAX)
+ 	rtableid = getrtable();
++# endif
+ 
+ 	while ((ch = getopt(argc, argv,
+ 	    "46DdFhI:i:klNnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
+@@ -202,10 +246,14 @@ main(int argc, char *argv[])
  			uflag = 1;
  			break;
  		case 'V':
 +# if defined(RT_TABLEID_MAX)
- 			rtableid = (unsigned int)strtonum(optarg, 0,
+ 			rtableid = (int)strtonum(optarg, 0,
  			    RT_TABLEID_MAX, &errstr);
  			if (errstr)
  				errx(1, "rtable %s: %s", errstr, optarg);
@@ -141,7 +151,7 @@ index 571de9a..cdcd646 100644
  			break;
  		case 'v':
  			vflag = 1;
-@@ -233,7 +279,11 @@ main(int argc, char *argv[])
+@@ -240,7 +288,11 @@ main(int argc, char *argv[])
  				    errstr, optarg);
  			break;
  		case 'S':
@@ -153,7 +163,7 @@ index 571de9a..cdcd646 100644
  			break;
  		case 'T':
  			errstr = NULL;
-@@ -260,6 +310,15 @@ main(int argc, char *argv[])
+@@ -267,6 +319,15 @@ main(int argc, char *argv[])
  	if (argv[0] && !argv[1] && family == AF_UNIX) {
  		host = argv[0];
  		uport = NULL;
@@ -169,7 +179,7 @@ index 571de9a..cdcd646 100644
  	} else if (argv[0] && !argv[1]) {
  		if  (!lflag)
  			usage(1);
-@@ -271,14 +330,7 @@ main(int argc, char *argv[])
+@@ -278,14 +339,7 @@ main(int argc, char *argv[])
  	} else
  		usage(1);
  
@@ -185,7 +195,7 @@ index 571de9a..cdcd646 100644
  
  	/* Get name of temporary socket for unix datagram client */
  	if ((family == AF_UNIX) && uflag && !lflag) {
-@@ -287,8 +339,8 @@ main(int argc, char *argv[])
+@@ -294,8 +348,8 @@ main(int argc, char *argv[])
  		} else {
  			strlcpy(unix_dg_tmp_socket_buf, "/tmp/nc.XXXXXXXXXX",
  				UNIX_DG_TMP_SOCKET_SIZE);
@@ -196,16 +206,14 @@ index 571de9a..cdcd646 100644
  			unix_dg_tmp_socket = unix_dg_tmp_socket_buf;
  		}
  	}
-@@ -580,18 +632,22 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -589,16 +643,20 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  		    res0->ai_protocol)) < 0)
  			continue;
  
 +# if defined(RT_TABLEID_MAX)
- 		if (rtableid) {
- 			if (setsockopt(s, SOL_SOCKET, SO_RTABLE, &rtableid,
- 			    sizeof(rtableid)) == -1)
- 				err(1, "setsockopt SO_RTABLE");
- 		}
+ 		if (rtableid >= 0 && (setsockopt(s, SOL_SOCKET, SO_RTABLE,
+ 		    &rtableid, sizeof(rtableid)) == -1))
+ 			err(1, "setsockopt SO_RTABLE");
 +# endif
  
  		/* Bind to a local port or source address if specified. */
@@ -219,22 +227,20 @@ index 571de9a..cdcd646 100644
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res0->ai_family;
  			ahints.ai_socktype = uflag ? SOCK_DGRAM : SOCK_STREAM;
-@@ -691,15 +747,23 @@ local_listen(char *host, char *port, struct addrinfo hints)
+@@ -698,13 +756,21 @@ local_listen(char *host, char *port, struct addrinfo hints)
  		    res0->ai_protocol)) < 0)
  			continue;
  
 +# if defined(RT_TABLEID_MAX)
- 		if (rtableid) {
- 			if (setsockopt(s, IPPROTO_IP, SO_RTABLE, &rtableid,
- 			    sizeof(rtableid)) == -1)
- 				err(1, "setsockopt SO_RTABLE");
- 		}
+ 		if (rtableid >= 0 && (setsockopt(s, IPPROTO_IP, SO_RTABLE,
+ 		    &rtableid, sizeof(rtableid)) == -1))
+ 			err(1, "setsockopt SO_RTABLE");
 +# endif
-+
+ 
 +		ret = setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &x, sizeof(x));
 +		if (ret == -1)
 +			err(1, NULL);
- 
++
 +# if defined(SO_REUSEPORT)
  		ret = setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &x, sizeof(x));
  		if (ret == -1)
@@ -243,7 +249,7 @@ index 571de9a..cdcd646 100644
  
  		set_common_sockopts(s);
  
-@@ -904,11 +968,13 @@ set_common_sockopts(int s)
+@@ -969,11 +1035,13 @@ set_common_sockopts(int s)
  {
  	int x = 1;
  
@@ -257,7 +263,7 @@ index 571de9a..cdcd646 100644
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
-@@ -962,6 +1028,7 @@ map_tos(char *s, int *val)
+@@ -1027,6 +1095,7 @@ map_tos(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -265,7 +271,7 @@ index 571de9a..cdcd646 100644
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -1008,6 +1075,9 @@ report_connect(const struct sockaddr *sa, socklen_t salen)
+@@ -1073,6 +1142,9 @@ report_connect(const struct sockaddr *sa, socklen_t salen)
  void
  help(void)
  {
@@ -275,7 +281,7 @@ index 571de9a..cdcd646 100644
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -1038,7 +1108,7 @@ help(void)
+@@ -1104,7 +1176,7 @@ help(void)
  	\t-x addr[:port]\tSpecify proxy address and port\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
@@ -284,10 +290,10 @@ index 571de9a..cdcd646 100644
  }
  
  void
-@@ -1046,7 +1116,7 @@ usage(int ret)
+@@ -1112,7 +1184,7 @@ usage(int ret)
  {
  	fprintf(stderr,
- 	    "usage: nc [-46DdhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
+ 	    "usage: nc [-46DdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
 -	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T ToS]\n"
 +	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T toskeyword]\n"
  	    "\t  [-V rtable] [-w timeout] [-X proxy_protocol]\n"

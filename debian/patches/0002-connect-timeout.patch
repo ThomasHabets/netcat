@@ -7,10 +7,10 @@ Subject: connect timeout
  1 file changed, 75 insertions(+), 2 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index cdcd646..52c0702 100644
+index 619a5a0..5304bc0 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -106,6 +106,10 @@
+@@ -107,6 +107,10 @@
  #define PORT_MAX_LEN	6
  #define UNIX_DG_TMP_SOCKET_SIZE	19
  
@@ -20,8 +20,8 @@ index cdcd646..52c0702 100644
 +
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
- unsigned int iflag;				/* Interval Flag */
-@@ -152,6 +156,9 @@ int	map_tos(char *, int *);
+ int	Fflag;					/* fdpass sock to stdout */
+@@ -155,6 +159,9 @@ int	map_tos(char *, int *);
  void	report_connect(const struct sockaddr *, socklen_t);
  void	usage(int);
  
@@ -31,7 +31,7 @@ index cdcd646..52c0702 100644
  int
  main(int argc, char *argv[])
  {
-@@ -664,11 +671,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -673,11 +680,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  
  		set_common_sockopts(s);
  
@@ -48,7 +48,7 @@ index cdcd646..52c0702 100644
  
  		close(s);
  		s = -1;
-@@ -716,6 +726,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
+@@ -725,6 +735,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
  	return (ret);
  }
  

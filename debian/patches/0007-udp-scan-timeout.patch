@@ -7,10 +7,10 @@ Subject: udp scan timeout
  1 file changed, 16 insertions(+), 9 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index 8f4bbe8..9c2e0d6 100644
+index 7a7114d..0e2c142 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -111,6 +111,8 @@
+@@ -112,6 +112,8 @@
  #define CONNECTION_FAILED 1
  #define CONNECTION_TIMEOUT 2
  
@@ -19,7 +19,7 @@ index 8f4bbe8..9c2e0d6 100644
  /* Command Line Options */
  int     Cflag = 0;                              /* CRLF line-ending */
  int	dflag;					/* detached, no stdin */
-@@ -510,7 +512,7 @@ main(int argc, char *argv[])
+@@ -519,7 +521,7 @@ main(int argc, char *argv[])
  				continue;
  
  			ret = 0;
@@ -28,7 +28,7 @@ index 8f4bbe8..9c2e0d6 100644
  				/* For UDP, make sure we are connected. */
  				if (uflag) {
  					if (udptest(s) == -1) {
-@@ -1071,15 +1073,20 @@ build_ports(char *p)
+@@ -1138,15 +1140,20 @@ build_ports(char *p)
  int
  udptest(int s)
  {
