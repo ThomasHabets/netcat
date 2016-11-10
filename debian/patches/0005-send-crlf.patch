@@ -3,12 +3,12 @@ Date: Mon, 13 Feb 2012 14:57:45 +0800
 Subject: send crlf
 
 ---
- nc.1     |    6 ++++--
- netcat.c |   21 +++++++++++++++++----
+ nc.1     |  6 ++++--
+ netcat.c | 21 +++++++++++++++++----
  2 files changed, 21 insertions(+), 6 deletions(-)
 
 diff --git a/nc.1 b/nc.1
-index b7014a2..af44976 100644
+index 3460fa6..d1bafc2 100644
 --- a/nc.1
 +++ b/nc.1
 @@ -34,7 +34,7 @@
@@ -29,7 +29,7 @@ index b7014a2..af44976 100644
  .It Fl D
  Enable debugging on the socket.
  .It Fl d
-@@ -355,7 +357,7 @@ More complicated examples can be built up when the user knows the format
+@@ -359,7 +361,7 @@ More complicated examples can be built up when the user knows the format
  of requests required by the server.
  As another example, an email may be submitted to an SMTP server using:
  .Bd -literal -offset indent
@@ -39,7 +39,7 @@ index b7014a2..af44976 100644
  MAIL FROM:\*(Ltuser@host.example.com\*(Gt
  RCPT TO:\*(Ltuser2@host.example.com\*(Gt
 diff --git a/netcat.c b/netcat.c
-index fdaca44..4f4d2bf 100644
+index 4ecb06f..168723b 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -111,6 +111,7 @@
@@ -49,17 +49,17 @@ index fdaca44..4f4d2bf 100644
 +int     Cflag = 0;                              /* CRLF line-ending */
  int	dflag;					/* detached, no stdin */
  unsigned int iflag;				/* Interval Flag */
- int	jflag;					/* use jumbo frames if we can */
+ int	kflag;					/* More than one connect */
 @@ -180,7 +181,7 @@ main(int argc, char *argv[])
  	sv = NULL;
  
  	while ((ch = getopt(argc, argv,
--	    "46DdhI:i:jklnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
-+	    "46CDdhI:i:jklnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
+-	    "46DdhI:i:klnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
++	    "46CDdhI:i:klnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -309,6 +310,9 @@ main(int argc, char *argv[])
+@@ -302,6 +303,9 @@ main(int argc, char *argv[])
  			if (Tflag < 0 || Tflag > 255 || errstr || errno)
  				errx(1, "illegal tos value %s", optarg);
  			break;
@@ -69,7 +69,7 @@ index fdaca44..4f4d2bf 100644
  		default:
  			usage(1);
  		}
-@@ -906,8 +910,16 @@ readwrite(int nfd)
+@@ -914,8 +918,16 @@ readwrite(int nfd)
  			else if (n == 0) {
  				goto shutdown_wr;
  			} else {
@@ -88,7 +88,7 @@ index fdaca44..4f4d2bf 100644
  			}
  			}
  			else if (pfd[1].revents & POLLHUP) {
-@@ -1139,6 +1151,7 @@ help(void)
+@@ -1166,6 +1178,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -96,12 +96,12 @@ index fdaca44..4f4d2bf 100644
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
  	\t-h		This help text\n\
-@@ -1172,7 +1185,7 @@ void
+@@ -1198,7 +1211,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,
--	    "usage: nc [-46DdhjklnrStUuvz] [-I length] [-i interval] [-O length]\n"
-+	    "usage: nc [-46CDdhjklnrStUuvz] [-I length] [-i interval] [-O length]\n"
+-	    "usage: nc [-46DdhklnrStUuvz] [-I length] [-i interval] [-O length]\n"
++	    "usage: nc [-46CDdhklnrStUuvz] [-I length] [-i interval] [-O length]\n"
  	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T toskeyword]\n"
  	    "\t  [-V rtable] [-w timeout] [-X proxy_protocol]\n"
  	    "\t  [-x proxy_address[:port]] [destination] [port]\n");

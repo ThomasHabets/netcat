@@ -3,12 +3,12 @@ Date: Mon, 13 Feb 2012 15:16:04 +0800
 Subject: quit timer
 
 ---
- nc.1     |    5 +++++
- netcat.c |   38 +++++++++++++++++++++++++++++++++-----
+ nc.1     |  5 +++++
+ netcat.c | 38 +++++++++++++++++++++++++++++++++-----
  2 files changed, 38 insertions(+), 5 deletions(-)
 
 diff --git a/nc.1 b/nc.1
-index af44976..0d92b74 100644
+index d1bafc2..2978437 100644
 --- a/nc.1
 +++ b/nc.1
 @@ -40,6 +40,7 @@
@@ -19,7 +19,7 @@ index af44976..0d92b74 100644
  .Op Fl s Ar source
  .Op Fl T Ar toskeyword
  .Op Fl V Ar rtable
-@@ -148,6 +149,10 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
+@@ -152,6 +153,10 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -31,7 +31,7 @@ index af44976..0d92b74 100644
  Specifies that source and/or destination ports should be chosen randomly
  instead of sequentially within a range or in the order that the system
 diff --git a/netcat.c b/netcat.c
-index 4f4d2bf..29ecf1a 100644
+index 168723b..a00647c 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -86,6 +86,7 @@
@@ -42,7 +42,7 @@ index 4f4d2bf..29ecf1a 100644
  #include <stdarg.h>
  #include <stdio.h>
  #include <stdlib.h>
-@@ -120,6 +121,7 @@ int	lflag;					/* Bind to local port */
+@@ -119,6 +120,7 @@ int	lflag;					/* Bind to local port */
  int	nflag;					/* Don't do name look up */
  char   *Pflag;					/* Proxy username */
  char   *pflag;					/* Localport flag */
@@ -62,12 +62,12 @@ index 4f4d2bf..29ecf1a 100644
  	sv = NULL;
  
  	while ((ch = getopt(argc, argv,
--	    "46CDdhI:i:jklnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
-+	    "46CDdhI:i:jklnO:P:p:q:rSs:tT:UuV:vw:X:x:z")) != -1) {
+-	    "46CDdhI:i:klnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
++	    "46CDdhI:i:klnO:P:p:q:rSs:tT:UuV:vw:X:x:z")) != -1) {
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -235,6 +238,11 @@ main(int argc, char *argv[])
+@@ -228,6 +231,11 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -79,7 +79,7 @@ index 4f4d2bf..29ecf1a 100644
  		case 'r':
  			rflag = 1;
  			break;
-@@ -924,9 +932,18 @@ readwrite(int nfd)
+@@ -932,9 +940,18 @@ readwrite(int nfd)
  			}
  			else if (pfd[1].revents & POLLHUP) {
  			shutdown_wr:
@@ -100,7 +100,7 @@ index 4f4d2bf..29ecf1a 100644
  			}
  		}
  	}
-@@ -1164,6 +1181,7 @@ help(void)
+@@ -1190,6 +1207,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -108,10 +108,10 @@ index 4f4d2bf..29ecf1a 100644
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s addr\t	Local source address\n\
-@@ -1186,9 +1204,19 @@ usage(int ret)
+@@ -1212,9 +1230,19 @@ usage(int ret)
  {
  	fprintf(stderr,
- 	    "usage: nc [-46CDdhjklnrStUuvz] [-I length] [-i interval] [-O length]\n"
+ 	    "usage: nc [-46CDdhklnrStUuvz] [-I length] [-i interval] [-O length]\n"
 -	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T toskeyword]\n"
 -	    "\t  [-V rtable] [-w timeout] [-X proxy_protocol]\n"
 +	    "\t  [-P proxy_username] [-p source_port] [-q seconds] [-s source]\n"

@@ -3,14 +3,14 @@ Date: Mon, 13 Feb 2012 14:45:08 +0800
 Subject: get sev by name
 
 ---
- netcat.c |    9 ++++++++-
+ netcat.c | 9 ++++++++-
  1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/netcat.c b/netcat.c
-index f3cc8c1..d912544 100644
+index a95d30d..a85cef0 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -949,12 +949,19 @@ atelnet(int nfd, unsigned char *buf, unsigned int size)
+@@ -957,12 +957,19 @@ atelnet(int nfd, unsigned char *buf, unsigned int size)
  void
  build_ports(char *p)
  {

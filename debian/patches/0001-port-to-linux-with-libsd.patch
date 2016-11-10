@@ -3,11 +3,11 @@ Date: Mon, 13 Feb 2012 15:59:31 +0800
 Subject: port to linux with libsd
 
 ---
- Makefile |   17 ++++++++--
- nc.1     |    4 +--
- netcat.c |  105 +++++++++++++++++++++++++++++++++++++++++++++++++++++---------
- socks.c  |   46 +++++++++++++--------------
- 4 files changed, 130 insertions(+), 42 deletions(-)
+ Makefile | 17 ++++++++++--
+ nc.1     |  4 +--
+ netcat.c | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++++++---------
+ socks.c  | 46 +++++++++++++++----------------
+ 4 files changed, 122 insertions(+), 41 deletions(-)
 
 diff --git a/Makefile b/Makefile
 index 150f829..96a6587 100644
@@ -36,10 +36,10 @@ index 150f829..96a6587 100644
 +clean:
 +	rm -f $(OBJS) nc
 diff --git a/nc.1 b/nc.1
-index 75d1437..b7014a2 100644
+index 232b6f5..3460fa6 100644
 --- a/nc.1
 +++ b/nc.1
-@@ -146,9 +146,6 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
+@@ -150,9 +150,6 @@ Proxy authentication is only supported for HTTP CONNECT proxies at present.
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -49,7 +49,7 @@ index 75d1437..b7014a2 100644
  .It Fl r
  Specifies that source and/or destination ports should be chosen randomly
  instead of sequentially within a range or in the order that the system
-@@ -170,6 +167,7 @@ Change IPv4 TOS value.
+@@ -174,6 +171,7 @@ Change IPv4 TOS value.
  may be one of
  .Ar critical ,
  .Ar inetcontrol ,
@@ -58,7 +58,7 @@ index 75d1437..b7014a2 100644
  .Ar netcontrol ,
  .Ar throughput ,
 diff --git a/netcat.c b/netcat.c
-index cc4683a..9b2def2 100644
+index a034bba..56dadce 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -42,6 +42,46 @@
@@ -126,19 +126,7 @@ index cc4683a..9b2def2 100644
  	const char *errstr, *proxyhost = "", *proxyport = NULL;
  	struct addrinfo proxyhints;
  	char unix_dg_tmp_socket_buf[UNIX_DG_TMP_SOCKET_SIZE];
-@@ -164,7 +206,11 @@ main(int argc, char *argv[])
- 				errx(1, "interval %s: %s", errstr, optarg);
- 			break;
- 		case 'j':
-+# if defined(SO_JUMBO)
- 			jflag = 1;
-+# else
-+			errx(1, "no jumbo frame support available");
-+# endif
- 			break;
- 		case 'k':
- 			kflag = 1;
-@@ -194,10 +240,14 @@ main(int argc, char *argv[])
+@@ -191,10 +233,14 @@ main(int argc, char *argv[])
  			uflag = 1;
  			break;
  		case 'V':
@@ -153,7 +141,7 @@ index cc4683a..9b2def2 100644
  			break;
  		case 'v':
  			vflag = 1;
-@@ -232,7 +282,11 @@ main(int argc, char *argv[])
+@@ -229,7 +275,11 @@ main(int argc, char *argv[])
  				    errstr, optarg);
  			break;
  		case 'S':
@@ -165,7 +153,7 @@ index cc4683a..9b2def2 100644
  			break;
  		case 'T':
  			errstr = NULL;
-@@ -259,6 +313,15 @@ main(int argc, char *argv[])
+@@ -256,6 +306,15 @@ main(int argc, char *argv[])
  	if (argv[0] && !argv[1] && family == AF_UNIX) {
  		host = argv[0];
  		uport = NULL;
@@ -181,7 +169,7 @@ index cc4683a..9b2def2 100644
  	} else if (argv[0] && !argv[1]) {
  		if  (!lflag)
  			usage(1);
-@@ -270,14 +333,7 @@ main(int argc, char *argv[])
+@@ -267,14 +326,7 @@ main(int argc, char *argv[])
  	} else
  		usage(1);
  
@@ -197,7 +185,7 @@ index cc4683a..9b2def2 100644
  
  	/* Get name of temporary socket for unix datagram client */
  	if ((family == AF_UNIX) && uflag && !lflag) {
-@@ -286,8 +342,8 @@ main(int argc, char *argv[])
+@@ -283,8 +335,8 @@ main(int argc, char *argv[])
  		} else {
  			strlcpy(unix_dg_tmp_socket_buf, "/tmp/nc.XXXXXXXXXX",
  				UNIX_DG_TMP_SOCKET_SIZE);
@@ -208,7 +196,7 @@ index cc4683a..9b2def2 100644
  			unix_dg_tmp_socket = unix_dg_tmp_socket_buf;
  		}
  	}
-@@ -563,18 +619,22 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -575,18 +627,22 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  		    res0->ai_protocol)) < 0)
  			continue;
  
@@ -231,7 +219,7 @@ index cc4683a..9b2def2 100644
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res0->ai_family;
  			ahints.ai_socktype = uflag ? SOCK_DGRAM : SOCK_STREAM;
-@@ -674,15 +734,23 @@ local_listen(char *host, char *port, struct addrinfo hints)
+@@ -686,15 +742,23 @@ local_listen(char *host, char *port, struct addrinfo hints)
  		    res0->ai_protocol)) < 0)
  			continue;
  
@@ -255,7 +243,7 @@ index cc4683a..9b2def2 100644
  
  		set_common_sockopts(s);
  
-@@ -886,21 +954,25 @@ set_common_sockopts(int s)
+@@ -898,11 +962,13 @@ set_common_sockopts(int s)
  {
  	int x = 1;
  
@@ -269,19 +257,7 @@ index cc4683a..9b2def2 100644
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
- 			err(1, NULL);
- 	}
-+# if defined(SO_JUMBO)
- 	if (jflag) {
- 		if (setsockopt(s, SOL_SOCKET, SO_JUMBO,
- 			&x, sizeof(x)) == -1)
- 			err(1, NULL);
- 	}
-+# endif
- 	if (Tflag != -1) {
- 		if (setsockopt(s, IPPROTO_IP, IP_TOS,
- 		    &Tflag, sizeof(Tflag)) == -1)
-@@ -949,6 +1021,7 @@ map_tos(char *s, int *val)
+@@ -956,6 +1022,7 @@ map_tos(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -289,7 +265,7 @@ index cc4683a..9b2def2 100644
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -969,6 +1042,9 @@ map_tos(char *s, int *val)
+@@ -1002,6 +1069,9 @@ report_connect(const struct sockaddr *sa, socklen_t salen)
  void
  help(void)
  {
@@ -299,15 +275,7 @@ index cc4683a..9b2def2 100644
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -978,6 +1054,7 @@ help(void)
- 	\t-h		This help text\n\
- 	\t-I length	TCP receive buffer length\n\
- 	\t-i secs\t	Delay interval for lines sent, ports scanned\n\
-+	\t-j		Use jumbo frame\n\
- 	\t-k		Keep inbound sockets open for multiple connects\n\
- 	\t-l		Listen mode, for inbound connects\n\
- 	\t-n		Suppress name/port resolutions\n\
-@@ -998,15 +1075,15 @@ help(void)
+@@ -1031,7 +1101,7 @@ help(void)
  	\t-x addr[:port]\tSpecify proxy address and port\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
@@ -316,18 +284,17 @@ index cc4683a..9b2def2 100644
  }
  
  void
- usage(int ret)
+@@ -1039,7 +1109,7 @@ usage(int ret)
  {
  	fprintf(stderr,
--	    "usage: nc [-46DdhklnrStUuvz] [-I length] [-i interval] [-O length]\n"
+ 	    "usage: nc [-46DdhklnrStUuvz] [-I length] [-i interval] [-O length]\n"
 -	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T ToS]\n"
-+	    "usage: nc [-46DdhjklnrStUuvz] [-I length] [-i interval] [-O length]\n"
 +	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T toskeyword]\n"
  	    "\t  [-V rtable] [-w timeout] [-X proxy_protocol]\n"
  	    "\t  [-x proxy_address[:port]] [destination] [port]\n");
  	if (ret)
 diff --git a/socks.c b/socks.c
-index 71108d5..befd0a9 100644
+index f8adda4..2cad460 100644
 --- a/socks.c
 +++ b/socks.c
 @@ -38,7 +38,7 @@
@@ -370,14 +337,14 @@ index 71108d5..befd0a9 100644
  		case SOCKS_IPV4:
  			cnt = atomicio(read, proxyfd, buf + 4, 6);
  			if (cnt != 6)
--				err(1, "read failed (%d/6)", cnt);
-+				err(1, "read failed (%lu/6)", (unsigned long)cnt);
+-				err(1, "read failed (%zu/6)", cnt);
++				err(1, "read failed (%zu/6)", (size_t)cnt);
  			break;
  		case SOCKS_IPV6:
  			cnt = atomicio(read, proxyfd, buf + 4, 18);
  			if (cnt != 18)
--				err(1, "read failed (%d/18)", cnt);
-+				err(1, "read failed (%lu/18)", (unsigned long)cnt);
+-				err(1, "read failed (%zu/18)", cnt);
++				err(1, "read failed (%zu/18)", (size_t)cnt);
  			break;
  		default:
  			errx(1, "connection failed, unsupported address type");

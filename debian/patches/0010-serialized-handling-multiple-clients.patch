@@ -3,14 +3,14 @@ Date: Tue, 14 Feb 2012 23:02:00 +0800
 Subject: serialized handling multiple clients
 
 ---
- netcat.c |   39 +++++++++++++++++++--------------------
+ netcat.c | 39 +++++++++++++++++++--------------------
  1 file changed, 19 insertions(+), 20 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index 56cc15e..bf9940f 100644
+index 4721218..0799794 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -447,26 +447,24 @@ main(int argc, char *argv[])
+@@ -440,26 +440,24 @@ main(int argc, char *argv[])
  				s = unix_bind(host);
  			else
  				s = unix_listen(host);
@@ -49,9 +49,9 @@ index 56cc15e..bf9940f 100644
 -				family,
 -				*uport);
  			/*
- 			 * For UDP, we will use recvfrom() initially
- 			 * to wait for a caller, then use the regular
-@@ -536,15 +534,16 @@ main(int argc, char *argv[])
+ 			 * For UDP and -k, don't connect the socket, let it
+ 			 * receive datagrams from multiple socket pairs.
+@@ -504,15 +502,16 @@ main(int argc, char *argv[])
  				close(connfd);
  			}
  

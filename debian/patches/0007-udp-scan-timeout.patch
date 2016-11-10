@@ -3,11 +3,11 @@ Date: Mon, 13 Feb 2012 15:29:37 +0800
 Subject: udp scan timeout
 
 ---
- netcat.c |   25 ++++++++++++++++---------
+ netcat.c | 25 ++++++++++++++++---------
  1 file changed, 16 insertions(+), 9 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index 29ecf1a..baab909 100644
+index a00647c..939a969 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -111,6 +111,8 @@
@@ -19,7 +19,7 @@ index 29ecf1a..baab909 100644
  /* Command Line Options */
  int     Cflag = 0;                              /* CRLF line-ending */
  int	dflag;					/* detached, no stdin */
-@@ -497,7 +499,7 @@ main(int argc, char *argv[])
+@@ -505,7 +507,7 @@ main(int argc, char *argv[])
  				continue;
  
  			ret = 0;
@@ -28,7 +28,7 @@ index 29ecf1a..baab909 100644
  				/* For UDP, make sure we are connected. */
  				if (uflag) {
  					if (udptest(s) == -1) {
-@@ -1057,15 +1059,20 @@ build_ports(char *p)
+@@ -1065,15 +1067,20 @@ build_ports(char *p)
  int
  udptest(int s)
  {
