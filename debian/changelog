@@ -1,12 +1,12 @@
-netcat-openbsd (1.122-1) UNRELEASED; urgency=low
+netcat-openbsd (1.127-1) UNRELEASED; urgency=low
 
   [ Aron Xu ]
   * Fix cross build ,thanks Colin Watson. (Closes: #694844)
 
   [ Guilhem Moulin ]
-  * New upstream release. (Closes: #751105)
+  * New upstream release. (Closes: #682444, #751105, #752931)
 
- -- Guilhem Moulin <guilhem@guilhem.org>  Thu, 10 Nov 2016 21:07:52 +0100
+ -- Guilhem Moulin <guilhem@guilhem.org>  Thu, 10 Nov 2016 21:19:27 +0100
 
 netcat-openbsd (1.105-7) unstable; urgency=low
 
