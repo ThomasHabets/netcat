@@ -30,10 +30,10 @@ index ca355c2..140fcd3 100644
  Specifies that
  .Nm
 diff --git a/netcat.c b/netcat.c
-index abfce94..78a88e2 100644
+index 9180e1f..2abe93c 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -131,6 +131,7 @@ int	rflag;					/* Random ports flag */
+@@ -136,6 +136,7 @@ int	rflag;					/* Random ports flag */
  char   *sflag;					/* Source Address */
  int	tflag;					/* Telnet Emulation */
  int	uflag;					/* UDP - Default to TCP */
@@ -41,15 +41,15 @@ index abfce94..78a88e2 100644
  int	vflag;					/* Verbosity */
  int	xflag;					/* Socks proxy */
  int	zflag;					/* Port Scan Flag */
-@@ -164,6 +165,7 @@ void	set_common_sockopts(int);
- int	map_tos(char *, int *);
- void	report_connect(const struct sockaddr *, socklen_t);
+@@ -171,6 +172,7 @@ void	report_connect(const struct sockaddr *, socklen_t);
  void	usage(int);
+ ssize_t drainbuf(int, unsigned char *, size_t *, int);
+ ssize_t fillbuf(int, unsigned char *, size_t *);
 +char    *proto_name(int uflag, int dccpflag);
  
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
-@@ -191,7 +193,7 @@ main(int argc, char *argv[])
+@@ -198,7 +200,7 @@ main(int argc, char *argv[])
  	sv = NULL;
  
  	while ((ch = getopt(argc, argv,
@@ -58,7 +58,7 @@ index abfce94..78a88e2 100644
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -261,6 +263,13 @@ main(int argc, char *argv[])
+@@ -268,6 +270,13 @@ main(int argc, char *argv[])
  		case 'u':
  			uflag = 1;
  			break;
@@ -72,7 +72,7 @@ index abfce94..78a88e2 100644
  		case 'V':
  # if defined(RT_TABLEID_MAX)
  			rtableid = (int)strtonum(optarg, 0,
-@@ -336,6 +345,12 @@ main(int argc, char *argv[])
+@@ -343,6 +352,12 @@ main(int argc, char *argv[])
  
  	/* Cruft to make sure options are clean, and used properly. */
  	if (argv[0] && !argv[1] && family == AF_UNIX) {
@@ -85,7 +85,7 @@ index abfce94..78a88e2 100644
  		host = argv[0];
  		uport = NULL;
  	} else if (!argv[0] && lflag) {
-@@ -377,8 +392,20 @@ main(int argc, char *argv[])
+@@ -384,8 +399,20 @@ main(int argc, char *argv[])
  	if (family != AF_UNIX) {
  		memset(&hints, 0, sizeof(struct addrinfo));
  		hints.ai_family = family;
@@ -108,7 +108,7 @@ index abfce94..78a88e2 100644
  		if (nflag)
  			hints.ai_flags |= AI_NUMERICHOST;
  	}
-@@ -386,7 +413,10 @@ main(int argc, char *argv[])
+@@ -393,7 +420,10 @@ main(int argc, char *argv[])
  	if (xflag) {
  		if (uflag)
  			errx(1, "no proxy support for UDP mode");
@@ -120,7 +120,7 @@ index abfce94..78a88e2 100644
  		if (lflag)
  			errx(1, "no proxy support for listen");
  
-@@ -430,12 +460,12 @@ main(int argc, char *argv[])
+@@ -437,12 +467,12 @@ main(int argc, char *argv[])
  				err(1, NULL);
  
  			char* local;
@@ -135,7 +135,7 @@ index abfce94..78a88e2 100644
  			fprintf(stderr, "Listening on [%s] (family %d, port %d)\n",
  				host ?: local,
  				family,
-@@ -540,19 +570,20 @@ main(int argc, char *argv[])
+@@ -547,19 +577,20 @@ main(int argc, char *argv[])
  					}
  				}
  
@@ -158,11 +158,11 @@ index abfce94..78a88e2 100644
  				    sv ? sv->s_name : "*");
  			}
  			if (Fflag)
-@@ -654,6 +685,24 @@ unix_listen(char *path)
+@@ -661,6 +692,24 @@ unix_listen(char *path)
  	return (s);
  }
  
-+char *proto_name(uflag, dccpflag) {
++char *proto_name(int uflag, int dccpflag) {
 +
 +    char *proto = NULL;
 +    if (uflag) {
@@ -183,7 +183,7 @@ index abfce94..78a88e2 100644
  /*
   * remote_connect()
   * Returns a socket connected to a remote host. Properly binds to a local
-@@ -690,8 +739,21 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -697,8 +746,21 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  # endif
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res0->ai_family;
@@ -207,10 +207,10 @@ index abfce94..78a88e2 100644
  			ahints.ai_flags = AI_PASSIVE;
  			if ((error = getaddrinfo(sflag, pflag, &ahints, &ares)))
  				errx(1, "getaddrinfo: %s", gai_strerror(error));
-@@ -703,15 +765,19 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -710,15 +772,19 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  		}
  
- 		set_common_sockopts(s);
+ 		set_common_sockopts(s, res0->ai_family);
 +		char *proto = proto_name(uflag, dccpflag);
  
 -                if ((error = connect_with_timeout(s, res0->ai_addr, res0->ai_addrlen, timeout))== CONNECTION_SUCCESS)
@@ -232,7 +232,7 @@ index abfce94..78a88e2 100644
  
  		close(s);
  		s = -1;
-@@ -1088,7 +1154,8 @@ build_ports(char *p)
+@@ -1249,7 +1315,8 @@ build_ports(char *p)
  	int hi, lo, cp;
  	int x = 0;
  
@@ -242,7 +242,7 @@ index abfce94..78a88e2 100644
          if (sv) {
                  portlist[0] = calloc(1, PORT_MAX_LEN);
                  if (portlist[0] == NULL)
-@@ -1313,6 +1380,7 @@ help(void)
+@@ -1483,6 +1550,7 @@ help(void)
  	\t-w secs\t	Timeout for connects and final net reads\n\
  	\t-X proto	Proxy protocol: \"4\", \"5\" (SOCKS) or \"connect\"\n\
  	\t-x addr[:port]\tSpecify proxy address and port\n\
@@ -250,7 +250,7 @@ index abfce94..78a88e2 100644
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
  	exit(0);
-@@ -1322,7 +1390,7 @@ void
+@@ -1492,7 +1560,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,

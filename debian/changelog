@@ -4,7 +4,11 @@ netcat-openbsd (1.127-1) UNRELEASED; urgency=low
   * Fix cross build ,thanks Colin Watson. (Closes: #694844)
 
   [ Guilhem Moulin ]
-  * New upstream release. (Closes: #682444, #751105, #752931)
+  * New upstream release. (Closes: #682444, #751105, #752931, #817050)
+  * Ensure each line ends with CRLF when -C is set, not just the last line
+    from the read buffer.  (Closes: #705223, #711784)
+  * Pause after each line when -i is set, not just after the last line from
+    the read buffer.
 
  -- Guilhem Moulin <guilhem@guilhem.org>  Thu, 10 Nov 2016 21:19:27 +0100
 

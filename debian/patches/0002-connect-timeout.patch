@@ -7,12 +7,12 @@ Subject: connect timeout
  1 file changed, 75 insertions(+), 2 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index f25cd85..665468f 100644
+index b7d94cd..80120c0 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -107,6 +107,10 @@
- #define PORT_MAX_LEN	6
- #define UNIX_DG_TMP_SOCKET_SIZE	19
+@@ -112,6 +112,10 @@
+ #define POLL_STDOUT 3
+ #define BUFSIZE 16384
  
 +#define CONNECTION_SUCCESS 0
 +#define CONNECTION_FAILED 1
@@ -21,9 +21,9 @@ index f25cd85..665468f 100644
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
-@@ -155,6 +159,9 @@ int	map_tos(char *, int *);
- void	report_connect(const struct sockaddr *, socklen_t);
- void	usage(int);
+@@ -162,6 +166,9 @@ void	usage(int);
+ ssize_t drainbuf(int, unsigned char *, size_t *);
+ ssize_t fillbuf(int, unsigned char *, size_t *);
  
 +static int connect_with_timeout(int fd, const struct sockaddr *sa,
 +        socklen_t salen, int ctimeout);
@@ -31,9 +31,9 @@ index f25cd85..665468f 100644
  int
  main(int argc, char *argv[])
  {
-@@ -670,11 +677,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -677,11 +684,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  
- 		set_common_sockopts(s);
+ 		set_common_sockopts(s, res0->ai_family);
  
 -		if (timeout_connect(s, res0->ai_addr, res0->ai_addrlen) == 0)
 +                if ((error = connect_with_timeout(s, res0->ai_addr, res0->ai_addrlen, timeout))== CONNECTION_SUCCESS)
@@ -48,7 +48,7 @@ index f25cd85..665468f 100644
  
  		close(s);
  		s = -1;
-@@ -722,6 +732,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
+@@ -729,6 +739,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
  	return (ret);
  }
  

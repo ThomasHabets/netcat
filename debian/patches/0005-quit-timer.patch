@@ -4,8 +4,8 @@ Subject: quit timer
 
 ---
  nc.1     |  5 +++++
- netcat.c | 38 +++++++++++++++++++++++++++++++++-----
- 2 files changed, 38 insertions(+), 5 deletions(-)
+ netcat.c | 35 ++++++++++++++++++++++++++++++++---
+ 2 files changed, 37 insertions(+), 3 deletions(-)
 
 diff --git a/nc.1 b/nc.1
 index 9374dc5..ca355c2 100644
@@ -31,10 +31,10 @@ index 9374dc5..ca355c2 100644
  Specifies that source and/or destination ports should be chosen randomly
  instead of sequentially within a range or in the order that the system
 diff --git a/netcat.c b/netcat.c
-index 49059eb..22ff6be 100644
+index 7dadac4..1d20b8e 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -87,6 +87,7 @@
+@@ -86,6 +86,7 @@
  #include <errno.h>
  #include <netdb.h>
  #include <poll.h>
@@ -42,7 +42,7 @@ index 49059eb..22ff6be 100644
  #include <stdarg.h>
  #include <stdio.h>
  #include <stdlib.h>
-@@ -122,6 +123,7 @@ int	Nflag;					/* shutdown() network socket */
+@@ -127,6 +128,7 @@ int	Nflag;					/* shutdown() network socket */
  int	nflag;					/* Don't do name look up */
  char   *Pflag;					/* Proxy username */
  char   *pflag;					/* Localport flag */
@@ -50,7 +50,7 @@ index 49059eb..22ff6be 100644
  int	rflag;					/* Random ports flag */
  char   *sflag;					/* Source Address */
  int	tflag;					/* Telnet Emulation */
-@@ -162,6 +164,7 @@ void	usage(int);
+@@ -169,6 +171,7 @@ ssize_t fillbuf(int, unsigned char *, size_t *);
  
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
@@ -58,7 +58,7 @@ index 49059eb..22ff6be 100644
  
  int
  main(int argc, char *argv[])
-@@ -185,7 +188,7 @@ main(int argc, char *argv[])
+@@ -192,7 +195,7 @@ main(int argc, char *argv[])
  	sv = NULL;
  
  	while ((ch = getopt(argc, argv,
@@ -67,7 +67,7 @@ index 49059eb..22ff6be 100644
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -238,6 +241,11 @@ main(int argc, char *argv[])
+@@ -245,6 +248,11 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -79,29 +79,28 @@ index 49059eb..22ff6be 100644
  		case 'r':
  			rflag = 1;
  			break;
-@@ -942,10 +950,19 @@ readwrite(int nfd)
- 			}
- 			else if (pfd[1].revents & POLLHUP) {
- 			shutdown_wr:
-+			/* if the user asked to exit on EOF, do it */
-+			if (qflag == 0) {
- 				if (Nflag)
- 					shutdown(nfd, SHUT_WR);
--				pfd[1].fd = -1;
--				pfd[1].events = 0;
-+				close(wfd);
-+			}
-+			/* if user asked to die after a while, arrange for it */
-+			if (qflag > 0) {
-+				signal(SIGALRM, quit);
-+				alarm(qflag);
-+			}
-+			pfd[1].fd = -1;
-+			pfd[1].events = 0;
- 			}
+@@ -1045,10 +1053,20 @@ readwrite(int net_fd)
+ 			if (pfd[POLL_NETOUT].fd != -1 && Nflag)
+ 				shutdown(pfd[POLL_NETOUT].fd, SHUT_WR);
+ 			pfd[POLL_NETOUT].fd = -1;
++			goto exit_on_eof;
+ 		}
+ 		/* net in gone and queue empty? */
+ 		if (pfd[POLL_NETIN].fd == -1 && netinbufpos == 0) {
+ 			pfd[POLL_STDOUT].fd = -1;
++			exit_on_eof:
++				/* if the user asked to exit on EOF, do it */
++				if (qflag == 0)
++					return;
++				/* if user asked to die after a while, arrange for it */
++				else if (qflag > 0) {
++					signal(SIGALRM, quit);
++					alarm(qflag);
++				}
  		}
  	}
-@@ -1263,6 +1280,7 @@ help(void)
+ }
+@@ -1434,6 +1452,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -109,7 +108,7 @@ index 49059eb..22ff6be 100644
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s addr\t	Local source address\n\
-@@ -1285,9 +1303,19 @@ usage(int ret)
+@@ -1456,9 +1475,19 @@ usage(int ret)
  {
  	fprintf(stderr,
  	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
