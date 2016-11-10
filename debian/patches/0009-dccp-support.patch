@@ -30,7 +30,7 @@ index ca355c2..140fcd3 100644
  Specifies that
  .Nm
 diff --git a/netcat.c b/netcat.c
-index 7871003..207e3b1 100644
+index abfce94..78a88e2 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -131,6 +131,7 @@ int	rflag;					/* Random ports flag */
@@ -49,8 +49,8 @@ index 7871003..207e3b1 100644
  
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
-@@ -194,7 +196,7 @@ main(int argc, char *argv[])
- # endif
+@@ -191,7 +193,7 @@ main(int argc, char *argv[])
+ 	sv = NULL;
  
  	while ((ch = getopt(argc, argv,
 -	    "46CDdFhI:i:klNnO:P:p:q:rSs:tT:UuV:vw:X:x:z")) != -1) {
@@ -58,7 +58,7 @@ index 7871003..207e3b1 100644
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -264,6 +266,13 @@ main(int argc, char *argv[])
+@@ -261,6 +263,13 @@ main(int argc, char *argv[])
  		case 'u':
  			uflag = 1;
  			break;
@@ -72,7 +72,7 @@ index 7871003..207e3b1 100644
  		case 'V':
  # if defined(RT_TABLEID_MAX)
  			rtableid = (int)strtonum(optarg, 0,
-@@ -339,6 +348,12 @@ main(int argc, char *argv[])
+@@ -336,6 +345,12 @@ main(int argc, char *argv[])
  
  	/* Cruft to make sure options are clean, and used properly. */
  	if (argv[0] && !argv[1] && family == AF_UNIX) {
@@ -85,7 +85,7 @@ index 7871003..207e3b1 100644
  		host = argv[0];
  		uport = NULL;
  	} else if (!argv[0] && lflag) {
-@@ -380,8 +395,20 @@ main(int argc, char *argv[])
+@@ -377,8 +392,20 @@ main(int argc, char *argv[])
  	if (family != AF_UNIX) {
  		memset(&hints, 0, sizeof(struct addrinfo));
  		hints.ai_family = family;
@@ -108,7 +108,7 @@ index 7871003..207e3b1 100644
  		if (nflag)
  			hints.ai_flags |= AI_NUMERICHOST;
  	}
-@@ -389,7 +416,10 @@ main(int argc, char *argv[])
+@@ -386,7 +413,10 @@ main(int argc, char *argv[])
  	if (xflag) {
  		if (uflag)
  			errx(1, "no proxy support for UDP mode");
@@ -120,7 +120,7 @@ index 7871003..207e3b1 100644
  		if (lflag)
  			errx(1, "no proxy support for listen");
  
-@@ -433,12 +463,12 @@ main(int argc, char *argv[])
+@@ -430,12 +460,12 @@ main(int argc, char *argv[])
  				err(1, NULL);
  
  			char* local;
@@ -135,7 +135,7 @@ index 7871003..207e3b1 100644
  			fprintf(stderr, "Listening on [%s] (family %d, port %d)\n",
  				host ?: local,
  				family,
-@@ -543,19 +573,20 @@ main(int argc, char *argv[])
+@@ -540,19 +570,20 @@ main(int argc, char *argv[])
  					}
  				}
  
@@ -158,7 +158,7 @@ index 7871003..207e3b1 100644
  				    sv ? sv->s_name : "*");
  			}
  			if (Fflag)
-@@ -657,6 +688,24 @@ unix_listen(char *path)
+@@ -654,6 +685,24 @@ unix_listen(char *path)
  	return (s);
  }
  
@@ -183,7 +183,7 @@ index 7871003..207e3b1 100644
  /*
   * remote_connect()
   * Returns a socket connected to a remote host. Properly binds to a local
-@@ -693,8 +742,21 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -690,8 +739,21 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  # endif
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res0->ai_family;
@@ -207,7 +207,7 @@ index 7871003..207e3b1 100644
  			ahints.ai_flags = AI_PASSIVE;
  			if ((error = getaddrinfo(sflag, pflag, &ahints, &ares)))
  				errx(1, "getaddrinfo: %s", gai_strerror(error));
-@@ -706,15 +768,19 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -703,15 +765,19 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  		}
  
  		set_common_sockopts(s);
@@ -232,7 +232,7 @@ index 7871003..207e3b1 100644
  
  		close(s);
  		s = -1;
-@@ -1090,7 +1156,8 @@ build_ports(char *p)
+@@ -1088,7 +1154,8 @@ build_ports(char *p)
  	int hi, lo, cp;
  	int x = 0;
  
@@ -242,7 +242,7 @@ index 7871003..207e3b1 100644
          if (sv) {
                  portlist[0] = calloc(1, PORT_MAX_LEN);
                  if (portlist[0] == NULL)
-@@ -1315,6 +1382,7 @@ help(void)
+@@ -1313,6 +1380,7 @@ help(void)
  	\t-w secs\t	Timeout for connects and final net reads\n\
  	\t-X proto	Proxy protocol: \"4\", \"5\" (SOCKS) or \"connect\"\n\
  	\t-x addr[:port]\tSpecify proxy address and port\n\
@@ -250,7 +250,7 @@ index 7871003..207e3b1 100644
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
  	exit(0);
-@@ -1324,7 +1392,7 @@ void
+@@ -1322,7 +1390,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,

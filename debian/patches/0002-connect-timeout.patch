@@ -7,7 +7,7 @@ Subject: connect timeout
  1 file changed, 75 insertions(+), 2 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index 619a5a0..5304bc0 100644
+index f25cd85..665468f 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -107,6 +107,10 @@
@@ -31,7 +31,7 @@ index 619a5a0..5304bc0 100644
  int
  main(int argc, char *argv[])
  {
-@@ -673,11 +680,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -670,11 +677,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  
  		set_common_sockopts(s);
  
@@ -48,7 +48,7 @@ index 619a5a0..5304bc0 100644
  
  		close(s);
  		s = -1;
-@@ -725,6 +735,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
+@@ -722,6 +732,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
  	return (ret);
  }
  

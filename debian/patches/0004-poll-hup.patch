@@ -7,10 +7,10 @@ Subject: poll hup
  1 file changed, 17 insertions(+), 7 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index 05b9580..dbfc35e 100644
+index 0749d3a..395bf68 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -904,9 +904,7 @@ readwrite(int nfd)
+@@ -902,9 +902,7 @@ readwrite(int nfd)
  			if ((n = read(nfd, buf, plen)) < 0)
  				return;
  			else if (n == 0) {
@@ -21,7 +21,7 @@ index 05b9580..dbfc35e 100644
  			} else {
  				if (tflag)
  					atelnet(nfd, buf, n);
-@@ -914,18 +912,30 @@ readwrite(int nfd)
+@@ -912,18 +910,30 @@ readwrite(int nfd)
  					return;
  			}
  		}

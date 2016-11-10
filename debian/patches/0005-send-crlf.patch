@@ -39,7 +39,7 @@ index daec9c5..9374dc5 100644
  MAIL FROM:\*(Ltuser@host.example.com\*(Gt
  RCPT TO:\*(Ltuser2@host.example.com\*(Gt
 diff --git a/netcat.c b/netcat.c
-index dbfc35e..e2f7802 100644
+index 395bf68..49059eb 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -112,6 +112,7 @@
@@ -50,8 +50,8 @@ index dbfc35e..e2f7802 100644
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
  unsigned int iflag;				/* Interval Flag */
-@@ -187,7 +188,7 @@ main(int argc, char *argv[])
- # endif
+@@ -184,7 +185,7 @@ main(int argc, char *argv[])
+ 	sv = NULL;
  
  	while ((ch = getopt(argc, argv,
 -	    "46DdFhI:i:klNnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
@@ -59,7 +59,7 @@ index dbfc35e..e2f7802 100644
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -315,6 +316,9 @@ main(int argc, char *argv[])
+@@ -312,6 +313,9 @@ main(int argc, char *argv[])
  			if (Tflag < 0 || Tflag > 255 || errstr || errno)
  				errx(1, "illegal tos value %s", optarg);
  			break;
@@ -69,7 +69,7 @@ index dbfc35e..e2f7802 100644
  		default:
  			usage(1);
  		}
-@@ -926,8 +930,16 @@ readwrite(int nfd)
+@@ -924,8 +928,16 @@ readwrite(int nfd)
  			else if (n == 0) {
  				goto shutdown_wr;
  			} else {
@@ -88,7 +88,7 @@ index dbfc35e..e2f7802 100644
  			}
  			}
  			else if (pfd[1].revents & POLLHUP) {
-@@ -1239,6 +1251,7 @@ help(void)
+@@ -1237,6 +1249,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -96,7 +96,7 @@ index dbfc35e..e2f7802 100644
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
  	\t-F		Pass socket fd\n\
-@@ -1273,7 +1286,7 @@ void
+@@ -1271,7 +1284,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,

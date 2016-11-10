@@ -31,7 +31,7 @@ index 9374dc5..ca355c2 100644
  Specifies that source and/or destination ports should be chosen randomly
  instead of sequentially within a range or in the order that the system
 diff --git a/netcat.c b/netcat.c
-index e2f7802..7a7114d 100644
+index 49059eb..22ff6be 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -87,6 +87,7 @@
@@ -58,8 +58,8 @@ index e2f7802..7a7114d 100644
  
  int
  main(int argc, char *argv[])
-@@ -188,7 +191,7 @@ main(int argc, char *argv[])
- # endif
+@@ -185,7 +188,7 @@ main(int argc, char *argv[])
+ 	sv = NULL;
  
  	while ((ch = getopt(argc, argv,
 -	    "46CDdFhI:i:klNnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
@@ -67,7 +67,7 @@ index e2f7802..7a7114d 100644
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -241,6 +244,11 @@ main(int argc, char *argv[])
+@@ -238,6 +241,11 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -79,7 +79,7 @@ index e2f7802..7a7114d 100644
  		case 'r':
  			rflag = 1;
  			break;
-@@ -944,10 +952,19 @@ readwrite(int nfd)
+@@ -942,10 +950,19 @@ readwrite(int nfd)
  			}
  			else if (pfd[1].revents & POLLHUP) {
  			shutdown_wr:
@@ -101,7 +101,7 @@ index e2f7802..7a7114d 100644
  			}
  		}
  	}
-@@ -1265,6 +1282,7 @@ help(void)
+@@ -1263,6 +1280,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -109,7 +109,7 @@ index e2f7802..7a7114d 100644
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s addr\t	Local source address\n\
-@@ -1287,9 +1305,19 @@ usage(int ret)
+@@ -1285,9 +1303,19 @@ usage(int ret)
  {
  	fprintf(stderr,
  	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
