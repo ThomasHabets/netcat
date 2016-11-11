@@ -3,10 +3,10 @@ Date: Mon, 13 Feb 2012 19:06:52 +0800
 Subject: misc failures and features
 
 ---
- Makefile |  3 +-
- nc.1     | 76 ++++++++++++++++++++++++++++++++++++++++++++++---
- netcat.c | 99 +++++++++++++++++++++++++++++++++++++++++++---------------------
- 3 files changed, 141 insertions(+), 37 deletions(-)
+ Makefile |   3 +-
+ nc.1     |  76 ++++++++++++++++++++++++++++++++++++++++++++---
+ netcat.c | 101 +++++++++++++++++++++++++++++++++++++++++++--------------------
+ 3 files changed, 143 insertions(+), 37 deletions(-)
 
 diff --git a/Makefile b/Makefile
 index 96a6587..becd854 100644
@@ -144,7 +144,7 @@ index fe42909..e95918a 100644
  UDP port scans using the
  .Fl uz
 diff --git a/netcat.c b/netcat.c
-index 5d3a2d3..e9519f6 100644
+index 258a29a..c47fc0f 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -90,6 +90,7 @@
@@ -377,13 +377,15 @@ index 5d3a2d3..e9519f6 100644
  		if (portlist[0] == NULL)
  			err(1, NULL);
  	}
-@@ -1400,6 +1427,13 @@ set_common_sockopts(int s, int af)
+@@ -1400,6 +1427,15 @@ set_common_sockopts(int s, int af)
  {
  	int x = 1;
  
 +# if defined(SO_BROADCAST)
 +	if (bflag) {
-+		if (setsockopt(s, IPPROTO_TCP, SO_BROADCAST,
++		/* allow datagram sockets to send packets to a broadcast address
++		 * (this option has no effect on stream-oriented sockets) */
++		if (setsockopt(s, SOL_SOCKET, SO_BROADCAST,
 +			&x, sizeof(x)) == -1)
 +			err(1, NULL);
 +	}
@@ -391,7 +393,7 @@ index 5d3a2d3..e9519f6 100644
  # if defined(TCP_MD5SIG)
  	if (Sflag) {
  		if (setsockopt(s, IPPROTO_TCP, TCP_MD5SIG,
-@@ -1523,6 +1557,7 @@ help(void)
+@@ -1523,6 +1559,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\

@@ -21,6 +21,9 @@ netcat-openbsd (1.130-1) UNRELEASED; urgency=low
   * debian/patches/0001-port-to-linux-with-libsd.patch: Don't truncate to
     "Proxy-Authorization" header to 7 bytes.  Thanks to Petros Angelatos for
     the patch.  (Closes: #792454)
+  * debian/patches/0010-misc-failures-and-features.patch: fix broadcast
+    support (SO_BROADCAST is a socket-level option not a TCP socket option).
+    Thanks to Jakob Wrigley for the patch.  (Closes: #702204)
 
  -- Guilhem Moulin <guilhem@guilhem.org>  Fri, 11 Nov 2016 02:28:22 +0100
 
