@@ -9,6 +9,8 @@ netcat-openbsd (1.130-1) UNRELEASED; urgency=low
     from the read buffer.  (Closes: #705223, #711784)
   * Pause after each line when -i is set, not just after the last line from
     the read buffer.
+  * debian/control:
+    + Bump Standards-Version to 3.9.8 (no changes necessary).
 
  -- Guilhem Moulin <guilhem@guilhem.org>  Fri, 11 Nov 2016 02:28:22 +0100
 
