@@ -17,6 +17,7 @@ netcat-openbsd (1.130-1) UNRELEASED; urgency=low
   * debian/compat: Bump debhelper compatibility version to 9.
   * debian/rules: Set DEB_BUILD_MAINT_OPTIONS to compile and link ELF
     executables with hardening options enabled.
+  * debian/copyright: Add missing entries for nc.1 and Makefile.
 
  -- Guilhem Moulin <guilhem@guilhem.org>  Fri, 11 Nov 2016 02:28:22 +0100
 

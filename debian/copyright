@@ -5,14 +5,23 @@ Files: netcat.c
 Copyright: 2001 Eric Jackson <ericj@monkey.org>
 License: BSD-3-Clause
 
+Files: nc.1
+Copyright: 1996 David Sacerdote
+License: BSD-3-Clause
+
 Files: atomicio.*
-Copyright: 2005 Anil Madhavapeddy
+Copyright: 2006 Damien Miller
+           2005 Anil Madhavapeddy
            1995,1999 Theo de Raadt
 License: BSD-3-Clause
 
 Files: socks.c
 Copyright: 1999 Niklas Hallqvist
            2004, 2005 Damien Miller
+License: BSD-3-Clause
+
+Files: Makefile
+Copyright: The OpenBSD project
 License: BSD-3-Clause
 
 Files: debian/*
