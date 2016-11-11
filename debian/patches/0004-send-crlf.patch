@@ -8,7 +8,7 @@ Subject: send crlf
  2 files changed, 40 insertions(+), 16 deletions(-)
 
 diff --git a/nc.1 b/nc.1
-index daec9c5..9374dc5 100644
+index 67cc19f..746d3b6 100644
 --- a/nc.1
 +++ b/nc.1
 @@ -34,7 +34,7 @@
@@ -39,10 +39,10 @@ index daec9c5..9374dc5 100644
  MAIL FROM:\*(Ltuser@host.example.com\*(Gt
  RCPT TO:\*(Ltuser2@host.example.com\*(Gt
 diff --git a/netcat.c b/netcat.c
-index 4b4fb68..0031ac7 100644
+index e0ad5c7..1c90145 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -117,6 +117,7 @@
+@@ -118,6 +118,7 @@
  #define CONNECTION_TIMEOUT 2
  
  /* Command Line Options */
@@ -50,7 +50,7 @@ index 4b4fb68..0031ac7 100644
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
  unsigned int iflag;				/* Interval Flag */
-@@ -163,7 +164,7 @@ void	set_common_sockopts(int, int);
+@@ -164,7 +165,7 @@ void	set_common_sockopts(int, int);
  int	map_tos(char *, int *);
  void	report_connect(const struct sockaddr *, socklen_t);
  void	usage(int);
@@ -59,8 +59,8 @@ index 4b4fb68..0031ac7 100644
  ssize_t fillbuf(int, unsigned char *, size_t *);
  
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
-@@ -191,7 +192,7 @@ main(int argc, char *argv[])
- 	sv = NULL;
+@@ -194,7 +195,7 @@ main(int argc, char *argv[])
+ 	signal(SIGPIPE, SIG_IGN);
  
  	while ((ch = getopt(argc, argv,
 -	    "46DdFhI:i:klNnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
@@ -68,7 +68,7 @@ index 4b4fb68..0031ac7 100644
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -319,6 +320,9 @@ main(int argc, char *argv[])
+@@ -322,6 +323,9 @@ main(int argc, char *argv[])
  			if (Tflag < 0 || Tflag > 255 || errstr || errno)
  				errx(1, "illegal tos value %s", optarg);
  			break;
@@ -78,7 +78,7 @@ index 4b4fb68..0031ac7 100644
  		default:
  			usage(1);
  		}
-@@ -925,12 +929,6 @@ readwrite(int net_fd)
+@@ -928,12 +932,6 @@ readwrite(int net_fd)
  			return;
  		}
  
@@ -91,7 +91,7 @@ index 4b4fb68..0031ac7 100644
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
  
-@@ -996,7 +994,7 @@ readwrite(int net_fd)
+@@ -999,7 +997,7 @@ readwrite(int net_fd)
  		/* try to write to network */
  		if (pfd[POLL_NETOUT].revents & POLLOUT && stdinbufpos > 0) {
  			ret = drainbuf(pfd[POLL_NETOUT].fd, stdinbuf,
@@ -100,7 +100,7 @@ index 4b4fb68..0031ac7 100644
  			if (ret == -1)
  				pfd[POLL_NETOUT].fd = -1;
  			/* buffer empty - remove self from polling */
-@@ -1031,7 +1029,7 @@ readwrite(int net_fd)
+@@ -1034,7 +1032,7 @@ readwrite(int net_fd)
  		/* try to write to stdout */
  		if (pfd[POLL_STDOUT].revents & POLLOUT && netinbufpos > 0) {
  			ret = drainbuf(pfd[POLL_STDOUT].fd, netinbuf,
@@ -109,7 +109,7 @@ index 4b4fb68..0031ac7 100644
  			if (ret == -1)
  				pfd[POLL_STDOUT].fd = -1;
  			/* buffer empty - remove self from polling */
-@@ -1056,17 +1054,40 @@ readwrite(int net_fd)
+@@ -1059,17 +1057,40 @@ readwrite(int net_fd)
  }
  
  ssize_t
@@ -153,7 +153,7 @@ index 4b4fb68..0031ac7 100644
  	/* adjust buffer */
  	adjust = *bufpos - n;
  	if (adjust > 0)
-@@ -1399,6 +1420,7 @@ help(void)
+@@ -1401,6 +1422,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -161,7 +161,7 @@ index 4b4fb68..0031ac7 100644
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
  	\t-F		Pass socket fd\n\
-@@ -1433,7 +1455,7 @@ void
+@@ -1435,7 +1457,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,

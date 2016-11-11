@@ -7,10 +7,10 @@ Subject: connect timeout
  1 file changed, 75 insertions(+), 2 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index b7d94cd..80120c0 100644
+index 30591de..d40e3a5 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -112,6 +112,10 @@
+@@ -113,6 +113,10 @@
  #define POLL_STDOUT 3
  #define BUFSIZE 16384
  
@@ -21,7 +21,7 @@ index b7d94cd..80120c0 100644
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
-@@ -162,6 +166,9 @@ void	usage(int);
+@@ -163,6 +167,9 @@ void	usage(int);
  ssize_t drainbuf(int, unsigned char *, size_t *);
  ssize_t fillbuf(int, unsigned char *, size_t *);
  
@@ -31,7 +31,7 @@ index b7d94cd..80120c0 100644
  int
  main(int argc, char *argv[])
  {
-@@ -677,11 +684,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -680,11 +687,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
  
  		set_common_sockopts(s, res0->ai_family);
  
@@ -48,7 +48,7 @@ index b7d94cd..80120c0 100644
  
  		close(s);
  		s = -1;
-@@ -729,6 +739,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
+@@ -732,6 +742,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
  	return (ret);
  }
  

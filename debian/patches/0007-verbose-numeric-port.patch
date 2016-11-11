@@ -7,7 +7,7 @@ Subject: verbose numeric port
  1 file changed, 16 insertions(+), 3 deletions(-)
 
 diff --git a/netcat.c b/netcat.c
-index 0a81e2e..9180e1f 100644
+index 9ab507a..3240a08 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -41,6 +41,7 @@
@@ -18,7 +18,7 @@ index 0a81e2e..9180e1f 100644
  
  #ifndef IPTOS_LOWDELAY
  # define IPTOS_LOWDELAY 0x10
-@@ -434,6 +435,18 @@ main(int argc, char *argv[])
+@@ -436,6 +437,18 @@ main(int argc, char *argv[])
  				s = local_listen(host, uport, hints);
  			if (s < 0)
  				err(1, NULL);
@@ -37,7 +37,7 @@ index 0a81e2e..9180e1f 100644
  			/*
  			 * For UDP and -k, don't connect the socket, let it
  			 * receive datagrams from multiple socket pairs.
-@@ -450,14 +463,14 @@ main(int argc, char *argv[])
+@@ -452,14 +465,14 @@ main(int argc, char *argv[])
  				char buf[16384];
  				struct sockaddr_storage z;
  
