@@ -395,7 +395,7 @@ index 1b06e0e..57e4316 100644
  			    sizeof(resp)) == -1)
  				errx(1, "Proxy username/password too long");
 -			r = snprintf(buf, sizeof(buf), "Proxy-Authorization: "
-+			r = snprintf((char*)buf, sizeof((char*)buf), "Proxy-Authorization: "
++			r = snprintf((char*)buf, sizeof(buf), "Proxy-Authorization: "
  			    "Basic %s\r\n", resp);
  			if (r == -1 || (size_t)r >= sizeof(buf))
  				errx(1, "Proxy auth response too long");
