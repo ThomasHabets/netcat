@@ -1,9 +1,10 @@
 netcat-openbsd (1.130-1) UNRELEASED; urgency=low
 
   [ Aron Xu ]
-  * Fix cross build ,thanks Colin Watson. (Closes: #694844)
+  * Fix cross build, thanks Colin Watson. (Closes: #694844)
 
   [ Guilhem Moulin ]
+  * Add self to Uploaders.
   * New upstream release. (Closes: #682444, #751105, #752931, #817050)
   * Ensure each line ends with CRLF when -C is set, not just the last line
     from the read buffer.  (Closes: #705223, #711784)
