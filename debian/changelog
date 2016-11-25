@@ -18,7 +18,10 @@ netcat-openbsd (1.130-1) unstable; urgency=low
   * debian/compat: Bump debhelper compatibility version to 9.
   * debian/rules: Set DEB_BUILD_MAINT_OPTIONS to compile and link ELF
     executables with hardening options enabled.
-  * debian/copyright: Add missing entries for nc.1 and Makefile.
+  * debian/copyright:
+    + Add missing entries for nc.1 and Makefile.
+    + Replace the format URI http://dep.debian.net/deps/dep5/ by a versioned
+      one https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/ .
   * debian/patches/0001-port-to-linux-with-libsd.patch: Don't truncate to
     "Proxy-Authorization" header to 7 bytes.  Thanks to Petros Angelatos for
     the patch.  (Closes: #792454)
