@@ -1,4 +1,4 @@
-netcat-openbsd (1.130-1) UNRELEASED; urgency=low
+netcat-openbsd (1.130-1) unstable; urgency=low
 
   [ Aron Xu ]
   * Fix cross build, thanks Colin Watson. (Closes: #694844)
