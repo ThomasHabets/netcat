@@ -4,8 +4,8 @@ Subject: quit timer
 
 ---
  nc.1     |  5 +++++
- netcat.c | 34 +++++++++++++++++++++++++++++++---
- 2 files changed, 36 insertions(+), 3 deletions(-)
+ netcat.c | 52 +++++++++++++++++++++++++++++++++++++++++++---------
+ 2 files changed, 48 insertions(+), 9 deletions(-)
 
 diff --git a/nc.1 b/nc.1
 index 746d3b6..1ee6887 100644
@@ -31,7 +31,7 @@ index 746d3b6..1ee6887 100644
  Specifies that source and/or destination ports should be chosen randomly
  instead of sequentially within a range or in the order that the system
 diff --git a/netcat.c b/netcat.c
-index 1c90145..058f22c 100644
+index 1c90145..7572bb2 100644
 --- a/netcat.c
 +++ b/netcat.c
 @@ -128,6 +128,7 @@ int	Nflag;					/* shutdown() network socket */
@@ -42,15 +42,17 @@ index 1c90145..058f22c 100644
  int	rflag;					/* Random ports flag */
  char   *sflag;					/* Source Address */
  int	tflag;					/* Telnet Emulation */
-@@ -170,6 +171,7 @@ ssize_t fillbuf(int, unsigned char *, size_t *);
- 
+@@ -171,6 +172,9 @@ ssize_t fillbuf(int, unsigned char *, size_t *);
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
-+static void quit();
  
++int	quit_fd = -1;
++static void quit();
++
  int
  main(int argc, char *argv[])
-@@ -195,7 +197,7 @@ main(int argc, char *argv[])
+ {
+@@ -195,7 +199,7 @@ main(int argc, char *argv[])
  	signal(SIGPIPE, SIG_IGN);
  
  	while ((ch = getopt(argc, argv,
@@ -59,7 +61,7 @@ index 1c90145..058f22c 100644
  		switch (ch) {
  		case '4':
  			family = AF_INET;
-@@ -248,6 +250,11 @@ main(int argc, char *argv[])
+@@ -248,6 +252,11 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -71,28 +73,45 @@ index 1c90145..058f22c 100644
  		case 'r':
  			rflag = 1;
  			break;
-@@ -1048,10 +1055,20 @@ readwrite(int net_fd)
- 			if (pfd[POLL_NETOUT].fd != -1 && Nflag)
- 				shutdown(pfd[POLL_NETOUT].fd, SHUT_WR);
- 			pfd[POLL_NETOUT].fd = -1;
-+			goto exit_on_eof;
+@@ -917,19 +926,31 @@ readwrite(int net_fd)
+ 		/* both inputs are gone, buffers are empty, we are done */
+ 		if (pfd[POLL_STDIN].fd == -1 && pfd[POLL_NETIN].fd == -1
+ 		    && stdinbufpos == 0 && netinbufpos == 0) {
+-			close(net_fd);
+-			return;
++			if (qflag == 0) {
++				close(net_fd);
++				return;
++			}
++			goto delay_exit;
  		}
- 		/* net in gone and queue empty? */
- 		if (pfd[POLL_NETIN].fd == -1 && netinbufpos == 0) {
- 			pfd[POLL_STDOUT].fd = -1;
-+			exit_on_eof:
-+				/* if the user asked to exit on EOF, do it */
-+				if (qflag == 0)
-+					return;
-+				/* if user asked to die after a while, arrange for it */
-+				else if (qflag > 0) {
-+					signal(SIGALRM, quit);
-+					alarm(qflag);
-+				}
+ 		/* both outputs are gone, we can't continue */
+ 		if (pfd[POLL_NETOUT].fd == -1 && pfd[POLL_STDOUT].fd == -1) {
+-			close(net_fd);
+-			return;
++			if (qflag == 0) {
++				close(net_fd);
++				return;
++			}
++			goto delay_exit;
  		}
- 	}
- }
-@@ -1436,6 +1453,7 @@ help(void)
+ 		/* listen and net in gone, queues empty, done */
+ 		if (lflag && pfd[POLL_NETIN].fd == -1
+ 		    && stdinbufpos == 0 && netinbufpos == 0) {
+-			close(net_fd);
+-			return;
++			if (qflag == 0) {
++				close(net_fd);
++				return;
++			}
++delay_exit:
++			quit_fd = net_fd;
++			signal(SIGALRM, quit);
++			alarm(qflag);
+ 		}
+ 
+ 		/* poll */
+@@ -1436,6 +1457,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -100,7 +119,7 @@ index 1c90145..058f22c 100644
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s addr\t	Local source address\n\
-@@ -1458,9 +1476,19 @@ usage(int ret)
+@@ -1458,9 +1480,21 @@ usage(int ret)
  {
  	fprintf(stderr,
  	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
@@ -119,7 +138,8 @@ index 1c90145..058f22c 100644
 + */
 +static void quit()
 +{
-+        /* XXX: should explicitly close fds here */
++        if (quit_fd >= 0)
++		close(quit_fd);
++
 +        exit(0);
 +}
--- 
