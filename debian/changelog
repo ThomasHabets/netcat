@@ -1,3 +1,10 @@
+netcat-openbsd (1.130-2) unstable; urgency=medium
+
+  * Fix handling of delayed exit option (Closes: #849192, LP: #1656785)
+    Thanks to Stefan Bader!
+
+ -- Aron Xu <aron@debian.org>  Thu, 26 Jan 2017 16:51:13 +0800
+
 netcat-openbsd (1.130-1) unstable; urgency=low
 
   [ Aron Xu ]
