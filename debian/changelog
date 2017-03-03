@@ -1,3 +1,12 @@
+netcat-openbsd (1.130-3) UNRELEASED; urgency=medium
+
+  * Change defaults from "-q0" to "-q-1" to match upstream defaults since the
+    introduction of flag "-N" in version 1.110.  Passing a non-negative value
+    to "-q" now implies "-N"; in particular, "-q0" is now a mere alias for
+    "-N". (Closes: #854292)
+
+ -- Guilhem Moulin <guilhem@guilhem.org>  Fri, 03 Mar 2017 20:32:55 +0100
+
 netcat-openbsd (1.130-2) unstable; urgency=medium
 
   * Fix handling of delayed exit option (Closes: #849192, LP: #1656785)
