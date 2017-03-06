@@ -1,4 +1,4 @@
-netcat-openbsd (1.130-3) UNRELEASED; urgency=medium
+netcat-openbsd (1.130-3) unstable; urgency=medium
 
   * Change defaults from "-q0" to "-q-1" to match upstream defaults since the
     introduction of flag "-N" in version 1.110.  Passing a non-negative value
