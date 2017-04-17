@@ -1,3 +1,10 @@
+netcat-openbsd (1.130-4) unstable; urgency=medium
+
+  * debian/copyright: Fix license for atomicio.[ch] and socks.c (2-clause vs
+    3-clause BSD). Closes: #860459.
+
+ -- Guilhem Moulin <guilhem@guilhem.org>  Mon, 17 Apr 2017 10:26:30 +0200
+
 netcat-openbsd (1.130-3) unstable; urgency=medium
 
   * Change defaults from "-q0" to "-q-1" to match upstream defaults since the
