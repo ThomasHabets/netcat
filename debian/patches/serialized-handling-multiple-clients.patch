@@ -3,15 +3,13 @@ Date: Tue, 14 Feb 2012 23:02:00 +0800
 Subject: serialized handling multiple clients
 
 ---
- netcat.c | 39 +++++++++++++++++++--------------------
- 1 file changed, 19 insertions(+), 20 deletions(-)
+ netcat.c |   41 ++++++++++++++++++++---------------------
+ 1 file changed, 20 insertions(+), 21 deletions(-)
 
-diff --git a/netcat.c b/netcat.c
-index f4d85af..5d3a2d3 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -459,26 +459,24 @@ main(int argc, char *argv[])
- 				s = unix_bind(host);
+@@ -621,7 +621,20 @@ main(int argc, char *argv[])
+ 				s = unix_bind(host, 0);
  			else
  				s = unix_listen(host);
 -		}
@@ -30,15 +28,19 @@ index f4d85af..5d3a2d3 100644
 +			family,
 +			*uport);
  
+ # if defined(TLS)
+ 		if (usetls) {
+@@ -635,22 +648,7 @@ main(int argc, char *argv[])
+ # endif
  		/* Allow only one connection at a time, but stay alive. */
  		for (;;) {
 -			if (family != AF_UNIX)
 -				s = local_listen(host, uport, hints);
 -			if (s < 0)
 -				err(1, NULL);
- 
+-
 -			char* local;
--			if (family == AF_INET6 )
+-			if (family == AF_INET6)
 -				local = "0.0.0.0";
 -			else if (family == AF_INET)
 -				local = ":::";
@@ -48,13 +50,14 @@ index f4d85af..5d3a2d3 100644
 -				host ?: local,
 -				family,
 -				*uport);
++
  			/*
  			 * For UDP and -k, don't connect the socket, let it
  			 * receive datagrams from multiple socket pairs.
-@@ -525,15 +523,16 @@ main(int argc, char *argv[])
+@@ -721,15 +719,16 @@ main(int argc, char *argv[])
+ # endif
  				close(connfd);
  			}
- 
 -			if (family != AF_UNIX)
 +			if (kflag)
 +				continue;
@@ -72,4 +75,3 @@ index f4d85af..5d3a2d3 100644
  		}
  	} else if (family == AF_UNIX) {
  		ret = 0;
--- 

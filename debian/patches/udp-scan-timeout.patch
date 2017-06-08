@@ -3,23 +3,21 @@ Date: Mon, 13 Feb 2012 15:29:37 +0800
 Subject: udp scan timeout
 
 ---
- netcat.c | 25 ++++++++++++++++---------
- 1 file changed, 16 insertions(+), 9 deletions(-)
+ netcat.c |   23 +++++++++++++++--------
+ 1 file changed, 15 insertions(+), 8 deletions(-)
 
-diff --git a/netcat.c b/netcat.c
-index f971893..9ab507a 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -117,6 +117,8 @@
+@@ -125,6 +125,8 @@
  #define CONNECTION_FAILED 1
  #define CONNECTION_TIMEOUT 2
  
 +#define UDP_SCAN_TIMEOUT 3			/* Seconds */
 +
  /* Command Line Options */
- int     Cflag = 0;                              /* CRLF line-ending */
  int	dflag;					/* detached, no stdin */
-@@ -525,7 +527,7 @@ main(int argc, char *argv[])
+ int	Fflag;					/* fdpass sock to stdout */
+@@ -734,7 +736,7 @@ main(int argc, char *argv[])
  				continue;
  
  			ret = 0;
@@ -28,19 +26,18 @@ index f971893..9ab507a 100644
  				/* For UDP, make sure we are connected. */
  				if (uflag) {
  					if (udptest(s) == -1) {
-@@ -1298,15 +1300,20 @@ build_ports(char *p)
+@@ -1619,15 +1621,20 @@ build_ports(char *p)
  int
  udptest(int s)
  {
 -	int i, ret;
--
++	int i, t;
+ 
 -	for (i = 0; i <= 3; i++) {
 -		if (write(s, "X", 1) == 1)
 -			ret = 1;
 -		else
 -			ret = -1;
-+	int i, t;
-+
 +	if ((write(s, "X", 1) != 1) ||
 +	    ((write(s, "X", 1) != 1) && (errno == ECONNREFUSED)))
 +		return -1;
@@ -57,4 +54,3 @@ index f971893..9ab507a 100644
  }
  
  void
--- 

@@ -3,16 +3,22 @@ Date: Mon, 13 Feb 2012 14:43:56 +0800
 Subject: connect timeout
 
 ---
- netcat.c | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 75 insertions(+), 2 deletions(-)
+ netcat.c |   78 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 76 insertions(+), 2 deletions(-)
 
-diff --git a/netcat.c b/netcat.c
-index 30591de..d40e3a5 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -113,6 +113,10 @@
- #define POLL_STDOUT 3
- #define BUFSIZE 16384
+@@ -86,6 +86,7 @@
+ 
+ #include <err.h>
+ #include <errno.h>
++#include <fcntl.h>
+ #include <limits.h>
+ #include <netdb.h>
+ #include <poll.h>
+@@ -120,6 +121,10 @@
+ # define TLS_CCERT	(1 << 4)
+ #endif
  
 +#define CONNECTION_SUCCESS 0
 +#define CONNECTION_FAILED 1
@@ -21,9 +27,9 @@ index 30591de..d40e3a5 100644
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
-@@ -163,6 +167,9 @@ void	usage(int);
- ssize_t drainbuf(int, unsigned char *, size_t *);
+@@ -204,6 +209,9 @@ ssize_t drainbuf(int, unsigned char *, s
  ssize_t fillbuf(int, unsigned char *, size_t *);
+ # endif
  
 +static int connect_with_timeout(int fd, const struct sockaddr *sa,
 +        socklen_t salen, int ctimeout);
@@ -31,15 +37,15 @@ index 30591de..d40e3a5 100644
  int
  main(int argc, char *argv[])
  {
-@@ -680,11 +687,14 @@ remote_connect(const char *host, const char *port, struct addrinfo hints)
+@@ -963,11 +971,14 @@ remote_connect(const char *host, const c
  
  		set_common_sockopts(s, res0->ai_family);
  
 -		if (timeout_connect(s, res0->ai_addr, res0->ai_addrlen) == 0)
 +                if ((error = connect_with_timeout(s, res0->ai_addr, res0->ai_addrlen, timeout))== CONNECTION_SUCCESS)
  			break;
--		else if (vflag)
-+		else if (vflag && error == CONNECTION_FAILED)
+-		if (vflag)
++		if (vflag && error == CONNECTION_FAILED)
  			warn("connect to %s port %s (%s) failed", host, port,
  			    uflag ? "udp" : "tcp");
 +                else if (vflag && error == CONNECTION_TIMEOUT)
@@ -48,7 +54,7 @@ index 30591de..d40e3a5 100644
  
  		close(s);
  		s = -1;
-@@ -732,6 +742,69 @@ timeout_connect(int s, const struct sockaddr *name, socklen_t namelen)
+@@ -1006,6 +1017,69 @@ timeout_connect(int s, const struct sock
  	return (ret);
  }
  
@@ -118,4 +124,3 @@ index 30591de..d40e3a5 100644
  /*
   * local_listen()
   * Returns a socket listening on a local port, binds to specified source
--- 

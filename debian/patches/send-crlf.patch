@@ -3,24 +3,22 @@ Date: Mon, 13 Feb 2012 14:57:45 +0800
 Subject: send crlf
 
 ---
- nc.1     |  6 ++++--
- netcat.c | 50 ++++++++++++++++++++++++++++++++++++--------------
- 2 files changed, 40 insertions(+), 16 deletions(-)
+ nc.1     |    6 +++--
+ netcat.c |   72 +++++++++++++++++++++++++++++++++++----------------------------
+ 2 files changed, 45 insertions(+), 33 deletions(-)
 
-diff --git a/nc.1 b/nc.1
-index 67cc19f..746d3b6 100644
 --- a/nc.1
 +++ b/nc.1
-@@ -34,7 +34,7 @@
+@@ -33,7 +33,7 @@
+ .Nd arbitrary TCP and UDP connections and listens
  .Sh SYNOPSIS
  .Nm nc
- .Bk -words
 -.Op Fl 46DdFhklNnrStUuvz
 +.Op Fl 46CDdFhklNnrStUuvz
  .Op Fl I Ar length
  .Op Fl i Ar interval
  .Op Fl O Ar length
-@@ -98,6 +98,8 @@ to use IPv4 addresses only.
+@@ -93,6 +93,8 @@ to use IPv4 addresses only.
  Forces
  .Nm
  to use IPv6 addresses only.
@@ -29,7 +27,7 @@ index 67cc19f..746d3b6 100644
  .It Fl D
  Enable debugging on the socket.
  .It Fl d
-@@ -377,7 +379,7 @@ More complicated examples can be built up when the user knows the format
+@@ -369,7 +371,7 @@ More complicated examples can be built u
  of requests required by the server.
  As another example, an email may be submitted to an SMTP server using:
  .Bd -literal -offset indent
@@ -38,47 +36,47 @@ index 67cc19f..746d3b6 100644
  HELO host.example.com
  MAIL FROM:\*(Ltuser@host.example.com\*(Gt
  RCPT TO:\*(Ltuser2@host.example.com\*(Gt
-diff --git a/netcat.c b/netcat.c
-index e0ad5c7..1c90145 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -118,6 +118,7 @@
- #define CONNECTION_TIMEOUT 2
+@@ -164,6 +164,8 @@ uint8_t *privkey;
+ size_t  privkeylen;
+ uint8_t *pubcert;
+ size_t  pubcertlen;
++# else
++int	Cflag = 0;			/* CRLF line-ending */
+ # endif
  
- /* Command Line Options */
-+int     Cflag = 0;                              /* CRLF line-ending */
- int	dflag;					/* detached, no stdin */
- int	Fflag;					/* fdpass sock to stdout */
- unsigned int iflag;				/* Interval Flag */
-@@ -164,7 +165,7 @@ void	set_common_sockopts(int, int);
- int	map_tos(char *, int *);
- void	report_connect(const struct sockaddr *, socklen_t);
- void	usage(int);
+ int timeout = -1;
+@@ -205,7 +207,7 @@ ssize_t fillbuf(int, unsigned char *, si
+ void tls_setup_client(struct tls *, int, char *);
+ struct tls *tls_setup_server(struct tls *, int, char *);
+ # else
 -ssize_t drainbuf(int, unsigned char *, size_t *);
 +ssize_t drainbuf(int, unsigned char *, size_t *, int);
  ssize_t fillbuf(int, unsigned char *, size_t *);
+ # endif
  
- static int connect_with_timeout(int fd, const struct sockaddr *sa,
-@@ -194,7 +195,7 @@ main(int argc, char *argv[])
- 	signal(SIGPIPE, SIG_IGN);
- 
- 	while ((ch = getopt(argc, argv,
--	    "46DdFhI:i:klNnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
-+	    "46CDdFhI:i:klNnO:P:p:rSs:tT:UuV:vw:X:x:z")) != -1) {
+@@ -243,7 +245,7 @@ main(int argc, char *argv[])
+ # if defined(TLS)
+ 	    "46C:cDde:FH:hI:i:K:klNnO:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
+ # else
+-	    "46DdFhI:i:klNnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
++	    "46CDdFhI:i:klNnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
+ # endif
  		switch (ch) {
  		case '4':
- 			family = AF_INET;
-@@ -322,6 +323,9 @@ main(int argc, char *argv[])
- 			if (Tflag < 0 || Tflag > 255 || errstr || errno)
- 				errx(1, "illegal tos value %s", optarg);
+@@ -272,6 +274,10 @@ main(int argc, char *argv[])
+ 		case 'c':
+ 			usetls = 1;
  			break;
-+                case 'C':
-+                        Cflag = 1;
-+                        break;
- 		default:
- 			usage(1);
- 		}
-@@ -928,12 +932,6 @@ readwrite(int net_fd)
++# else
++		case 'C':
++			Cflag = 1;
++			break;
+ # endif
+ 		case 'd':
+ 			dflag = 1;
+@@ -1201,12 +1207,6 @@ readwrite(int net_fd)
  			return;
  		}
  
@@ -91,36 +89,54 @@ index e0ad5c7..1c90145 100644
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
  
-@@ -999,7 +997,7 @@ readwrite(int net_fd)
- 		/* try to write to network */
- 		if (pfd[POLL_NETOUT].revents & POLLOUT && stdinbufpos > 0) {
- 			ret = drainbuf(pfd[POLL_NETOUT].fd, stdinbuf,
+@@ -1288,7 +1288,7 @@ readwrite(int net_fd)
+ 				pfd[POLL_NETOUT].events = POLLOUT;
+ 			else
+ # else
 -			    &stdinbufpos);
 +			    &stdinbufpos, (iflag || Cflag) ? 1 : 0);
+ # endif
  			if (ret == -1)
  				pfd[POLL_NETOUT].fd = -1;
- 			/* buffer empty - remove self from polling */
-@@ -1034,7 +1032,7 @@ readwrite(int net_fd)
- 		/* try to write to stdout */
- 		if (pfd[POLL_STDOUT].revents & POLLOUT && netinbufpos > 0) {
- 			ret = drainbuf(pfd[POLL_STDOUT].fd, netinbuf,
+@@ -1341,7 +1341,7 @@ readwrite(int net_fd)
+ 				pfd[POLL_STDOUT].events = POLLOUT;
+ 			else
+ # else
 -			    &netinbufpos);
 +			    &netinbufpos, 0);
+ # endif
  			if (ret == -1)
  				pfd[POLL_STDOUT].fd = -1;
- 			/* buffer empty - remove self from polling */
-@@ -1059,17 +1057,40 @@ readwrite(int net_fd)
+@@ -1367,31 +1367,40 @@ readwrite(int net_fd)
  }
  
  ssize_t
+-# if defined(TLS)
+-drainbuf(int fd, unsigned char *buf, size_t *bufpos, struct tls *tls)
+-# else
 -drainbuf(int fd, unsigned char *buf, size_t *bufpos)
+-# endif
 +drainbuf(int fd, unsigned char *buf, size_t *bufpos, int oneline)
  {
 -	ssize_t n;
 +	ssize_t n, r;
  	ssize_t adjust;
 +	unsigned char *lf = NULL;
-+
+ 
+-# if defined(TLS)
+-	if (tls)
+-		n = tls_write(tls, buf, *bufpos);
+-	else {
+-# endif
+-		n = write(fd, buf, *bufpos);
+-		/* don't treat EAGAIN, EINTR as error */
+-		if (n == -1 && (errno == EAGAIN || errno == EINTR))
+-# if defined(TLS)
+-			n = TLS_WANT_POLLOUT;
+-	}
+-# else
+-			n = -2;
+-# endif
 +	if (oneline)
 +		lf = memchr(buf, '\n', *bufpos);
 +	if (lf == NULL) {
@@ -135,11 +151,10 @@ index e0ad5c7..1c90145 100644
 +		n = lf - buf + 1;
 +	if (n > 0)
 +		n = write(fd, buf, n);
- 
--	n = write(fd, buf, *bufpos);
- 	/* don't treat EAGAIN, EINTR as error */
- 	if (n == -1 && (errno == EAGAIN || errno == EINTR))
- 		n = -2;
++
++	/* don't treat EAGAIN, EINTR as error */
++	if (n == -1 && (errno == EAGAIN || errno == EINTR))
++		n = -2;
 +	if (oneline == 2 && n >= 0)
 +		n++;
  	if (n <= 0)
@@ -153,7 +168,7 @@ index e0ad5c7..1c90145 100644
  	/* adjust buffer */
  	adjust = *bufpos - n;
  	if (adjust > 0)
-@@ -1401,6 +1422,7 @@ help(void)
+@@ -1779,6 +1788,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -161,13 +176,12 @@ index e0ad5c7..1c90145 100644
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
  	\t-F		Pass socket fd\n\
-@@ -1435,7 +1457,7 @@ void
+@@ -1813,7 +1823,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,
 -	    "usage: nc [-46DdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
 +	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
- 	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T toskeyword]\n"
+ 	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T keyword]\n"
  	    "\t  [-V rtable] [-w timeout] [-X proxy_protocol]\n"
  	    "\t  [-x proxy_address[:port]] [destination] [port]\n");
--- 

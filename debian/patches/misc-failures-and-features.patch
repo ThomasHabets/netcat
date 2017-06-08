@@ -3,13 +3,11 @@ Date: Mon, 13 Feb 2012 19:06:52 +0800
 Subject: misc failures and features
 
 ---
- Makefile |   3 +-
- nc.1     |  76 ++++++++++++++++++++++++++++++++++++++++++++---
- netcat.c | 101 +++++++++++++++++++++++++++++++++++++++++++--------------------
- 3 files changed, 143 insertions(+), 37 deletions(-)
+ Makefile |    3 +
+ nc.1     |   76 ++++++++++++++++++++++++++++++++++++++++++++++--
+ netcat.c |   98 +++++++++++++++++++++++++++++++++++++++++++--------------------
+ 3 files changed, 142 insertions(+), 35 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index 96a6587..becd854 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -3,7 +3,8 @@
@@ -22,20 +20,18 @@ index 96a6587..becd854 100644
  OBJS=  $(SRCS:.c=.o)
  CFLAGS=  -g -O2
  LDFLAGS=  -Wl,--no-add-needed
-diff --git a/nc.1 b/nc.1
-index fe42909..e95918a 100644
 --- a/nc.1
 +++ b/nc.1
-@@ -34,7 +34,7 @@
+@@ -33,7 +33,7 @@
+ .Nd arbitrary TCP and UDP connections and listens
  .Sh SYNOPSIS
  .Nm nc
- .Bk -words
 -.Op Fl 46CDdFhklNnrStUuvZz
 +.Op Fl 46bCDdFhklNnrStUuvZz
  .Op Fl I Ar length
  .Op Fl i Ar interval
  .Op Fl O Ar length
-@@ -99,6 +99,8 @@ to use IPv4 addresses only.
+@@ -94,6 +94,8 @@ to use IPv4 addresses only.
  Forces
  .Nm
  to use IPv6 addresses only.
@@ -44,7 +40,7 @@ index fe42909..e95918a 100644
  .It Fl C
  Send CRLF as line-ending.
  .It Fl D
-@@ -345,6 +347,54 @@ and which side is being used as a
+@@ -342,6 +344,54 @@ and which side is being used as a
  The connection may be terminated using an
  .Dv EOF
  .Pq Sq ^D .
@@ -99,7 +95,7 @@ index fe42909..e95918a 100644
  .Sh DATA TRANSFER
  The example in the previous section can be expanded to build a
  basic data transfer model.
-@@ -404,15 +454,30 @@ The
+@@ -401,15 +451,30 @@ The
  flag can be used to tell
  .Nm
  to report open ports,
@@ -133,7 +129,7 @@ index fe42909..e95918a 100644
  .Pp
  Alternatively, it might be useful to know which server software
  is running, and which versions.
-@@ -477,6 +542,9 @@ Original implementation by *Hobbit*
+@@ -474,6 +539,9 @@ Original implementation by *Hobbit*
  .br
  Rewritten with IPv6 support by
  .An Eric Jackson Aq Mt ericj@monkey.org .
@@ -143,11 +139,9 @@ index fe42909..e95918a 100644
  .Sh CAVEATS
  UDP port scans using the
  .Fl uz
-diff --git a/netcat.c b/netcat.c
-index 258a29a..c47fc0f 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -90,6 +90,7 @@
+@@ -92,6 +92,7 @@
  #include <netdb.h>
  #include <poll.h>
  #include <signal.h>
@@ -155,15 +149,15 @@ index 258a29a..c47fc0f 100644
  #include <stdarg.h>
  #include <stdio.h>
  #include <stdlib.h>
-@@ -121,6 +122,7 @@
+@@ -129,6 +130,7 @@
  #define UDP_SCAN_TIMEOUT 3			/* Seconds */
  
  /* Command Line Options */
 +int	bflag;					/* Allow Broadcast */
- int     Cflag = 0;                              /* CRLF line-ending */
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
-@@ -153,7 +155,7 @@ char *portlist[PORT_MAX+1];
+ unsigned int iflag;				/* Interval Flag */
+@@ -179,7 +181,7 @@ char *portlist[PORT_MAX+1];
  char *unix_dg_tmp_socket;
  
  void	atelnet(int, unsigned char *, unsigned int);
@@ -171,8 +165,8 @@ index 258a29a..c47fc0f 100644
 +void	build_ports(char **);
  void	help(void);
  int	local_listen(char *, char *, struct addrinfo);
- void	readwrite(int);
-@@ -182,11 +184,14 @@ int
+ # if defined(TLS)
+@@ -226,11 +228,14 @@ int
  main(int argc, char *argv[])
  {
  	int ch, s, ret, socksv;
@@ -189,16 +183,19 @@ index 258a29a..c47fc0f 100644
  	char *proxy = NULL;
  	const char *errstr, *proxyhost = "", *proxyport = NULL;
  	struct addrinfo proxyhints;
-@@ -202,7 +207,7 @@ main(int argc, char *argv[])
- 	signal(SIGPIPE, SIG_IGN);
+@@ -251,9 +256,9 @@ main(int argc, char *argv[])
  
  	while ((ch = getopt(argc, argv,
--	    "46CDdFhI:i:klNnO:P:p:q:rSs:tT:UuV:vw:X:x:Zz")) != -1) {
-+	    "46bCDdFhI:i:klNnO:P:p:q:rSs:tT:UuV:vw:X:x:Zz")) != -1) {
+ # if defined(TLS)
+-	    "46C:cDde:FH:hI:i:K:klNnO:P:p:q:R:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
++	    "46bC:cDde:FH:hI:i:K:klNnO:P:p:q:R:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
+ # else
+-	    "46CDdFhI:i:klNnO:P:p:q:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
++	    "46bCDdFhI:i:klNnO:P:p:q:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
+ # endif
  		switch (ch) {
  		case '4':
- 			family = AF_INET;
-@@ -210,6 +215,13 @@ main(int argc, char *argv[])
+@@ -262,6 +267,13 @@ main(int argc, char *argv[])
  		case '6':
  			family = AF_INET6;
  			break;
@@ -212,7 +209,7 @@ index 258a29a..c47fc0f 100644
  		case 'U':
  			family = AF_UNIX;
  			break;
-@@ -354,35 +366,40 @@ main(int argc, char *argv[])
+@@ -452,32 +464,39 @@ main(int argc, char *argv[])
  
  	/* Cruft to make sure options are clean, and used properly. */
  	if (argv[0] && !argv[1] && family == AF_UNIX) {
@@ -231,8 +228,6 @@ index 258a29a..c47fc0f 100644
 -			errx(1, "cannot use -z and -l");
 -		if (pflag)
 -			uport=pflag;
--	} else if (!lflag && kflag) {
--		errx(1, "cannot use -k without -l");
 -	} else if (argv[0] && !argv[1]) {
 -		if  (!lflag)
 -			usage(1);
@@ -251,11 +246,10 @@ index 258a29a..c47fc0f 100644
  	} else if (argv[0] && argv[1]) {
  		host = argv[0];
 -		uport = argv[1];
-+		uport = &argv[1];
++ 		uport = &argv[1];
  	} else
  		usage(1);
  
--
 +	if (lflag) {
 +		if (sflag)
 +			errx(1, "cannot use -s and -l");
@@ -265,12 +259,11 @@ index 258a29a..c47fc0f 100644
 +			/* This still does not work well because of getopt mess
 +			errx(1, "cannot use -p and -l"); */
 +			uport = &pflag;
-+	} else if (!lflag && kflag)
-+		errx(1, "cannot use -k without -l");
- 
- 	/* Get name of temporary socket for unix datagram client */
- 	if ((family == AF_UNIX) && uflag && !lflag) {
-@@ -460,7 +477,7 @@ main(int argc, char *argv[])
++	}
+ 	if (!lflag && kflag)
+ 		errx(1, "must use -l with -k");
+ # if defined(TLS)
+@@ -622,7 +640,7 @@ main(int argc, char *argv[])
  			else
  				s = unix_listen(host);
  		} else
@@ -279,7 +272,7 @@ index 258a29a..c47fc0f 100644
  		if (s < 0)
  			err(1, NULL);
  
-@@ -469,7 +486,8 @@ main(int argc, char *argv[])
+@@ -631,7 +649,8 @@ main(int argc, char *argv[])
  			local = ":::";
  		else
  			local = "0.0.0.0";
@@ -289,47 +282,47 @@ index 258a29a..c47fc0f 100644
  			host ?: local,
  			family,
  			*uport);
-@@ -632,6 +650,8 @@ unix_bind(char *path)
+@@ -854,6 +873,8 @@ unix_bind(char *path, int flags)
+ 	    0)) < 0)
  		return (-1);
- 	}
  
 +        unlink(path);
 +
- 	if (bind(s, (struct sockaddr *)&sun, SUN_LEN(&sun)) < 0) {
- 		close(s);
- 		return (-1);
-@@ -653,8 +673,10 @@ unix_connect(char *path)
- 		if ((s = unix_bind(unix_dg_tmp_socket)) < 0)
+ 	memset(&s_un, 0, sizeof(struct sockaddr_un));
+ 	s_un.sun_family = AF_UNIX;
+ 
+@@ -949,8 +970,10 @@ unix_connect(char *path)
+ 		if ((s = unix_bind(unix_dg_tmp_socket, SOCK_CLOEXEC)) < 0)
  			return (-1);
  	} else {
--		if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-+		if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+-		if ((s = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0)) < 0)
++		if ((s = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0)) < 0) {
 +                        errx(1,"create unix socket failed");
  			return (-1);
 +                }
  	}
- 	(void)fcntl(s, F_SETFD, FD_CLOEXEC);
  
-@@ -665,9 +687,11 @@ unix_connect(char *path)
- 	    sizeof(sun.sun_path)) {
+ 	memset(&s_un, 0, sizeof(struct sockaddr_un));
+@@ -960,9 +983,11 @@ unix_connect(char *path)
+ 	    sizeof(s_un.sun_path)) {
  		close(s);
  		errno = ENAMETOOLONG;
-+                warn("unix connect abandoned");
++ 		warn("unix connect abandoned");
  		return (-1);
  	}
- 	if (connect(s, (struct sockaddr *)&sun, SUN_LEN(&sun)) < 0) {
-+                warn("unix connect failed");
+ 	if (connect(s, (struct sockaddr *)&s_un, sizeof(s_un)) < 0) {
++ 		warn("unix connect failed");
  		close(s);
  		return (-1);
  	}
-@@ -1307,22 +1331,23 @@ atelnet(int nfd, unsigned char *buf, unsigned int size)
+@@ -1633,20 +1658,21 @@ atelnet(int nfd, unsigned char *buf, uns
   * that we should try to connect to.
   */
  void
 -build_ports(char *p)
 +build_ports(char **p)
  {
-         struct servent *sv;
+ 	struct servent *sv;
  	const char *errstr;
  	char *n;
  	int hi, lo, cp;
@@ -339,17 +332,15 @@ index 258a29a..c47fc0f 100644
  	char *proto = proto_name(uflag, dccpflag);
 -	sv = getservbyname(p, proto);
 +	sv = getservbyname(*p, proto);
-         if (sv) {
-                 portlist[0] = calloc(1, PORT_MAX_LEN);
-                 if (portlist[0] == NULL)
-                         err(1, NULL);
-                 snprintf(portlist[0], PORT_MAX_LEN, "%d", ntohs(sv->s_port));
--        } else if ((n = strchr(p, '-')) != NULL) {
-+        } else if ((n = strchr(*p, '-')) != NULL) {
+ 	if (sv) {
+ 		if (asprintf(&portlist[0], "%d", ntohs(sv->s_port)) < 0)
+ 			err(1, "asprintf");
+-	} else if ((n = strchr(p, '-')) != NULL) {
++	} else if ((n = strchr(*p, '-')) != NULL) {
  		*n = '\0';
  		n++;
  
-@@ -1330,9 +1355,9 @@ build_ports(char *p)
+@@ -1654,9 +1680,9 @@ build_ports(char *p)
  		hi = strtonum(n, 1, PORT_MAX, &errstr);
  		if (errstr)
  			errx(1, "port number %s: %s", errstr, n);
@@ -361,7 +352,7 @@ index 258a29a..c47fc0f 100644
  
  		if (lo > hi) {
  			cp = hi;
-@@ -1362,10 +1387,12 @@ build_ports(char *p)
+@@ -1683,10 +1709,12 @@ build_ports(char *p)
  			}
  		}
  	} else {
@@ -377,7 +368,7 @@ index 258a29a..c47fc0f 100644
  		if (portlist[0] == NULL)
  			err(1, NULL);
  	}
-@@ -1400,6 +1427,15 @@ set_common_sockopts(int s, int af)
+@@ -1721,6 +1749,15 @@ set_common_sockopts(int s, int af)
  {
  	int x = 1;
  
@@ -393,7 +384,7 @@ index 258a29a..c47fc0f 100644
  # if defined(TCP_MD5SIG)
  	if (Sflag) {
  		if (setsockopt(s, IPPROTO_TCP, TCP_MD5SIG,
-@@ -1523,6 +1559,7 @@ help(void)
+@@ -1892,6 +1929,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -401,4 +392,3 @@ index 258a29a..c47fc0f 100644
  	\t-C		Send CRLF as line-ending\n\
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
--- 

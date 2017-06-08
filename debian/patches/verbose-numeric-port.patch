@@ -3,14 +3,12 @@ Date: Mon, 13 Feb 2012 15:38:15 +0800
 Subject: verbose numeric port
 
 ---
- netcat.c | 19 ++++++++++++++++---
+ netcat.c |   19 ++++++++++++++++---
  1 file changed, 16 insertions(+), 3 deletions(-)
 
-diff --git a/netcat.c b/netcat.c
-index 9ab507a..3240a08 100644
 --- a/netcat.c
 +++ b/netcat.c
-@@ -41,6 +41,7 @@
+@@ -43,6 +43,7 @@
  #include <netinet/tcp.h>
  #include <netinet/ip.h>
  #include <arpa/telnet.h>
@@ -18,18 +16,18 @@ index 9ab507a..3240a08 100644
  
  #ifndef IPTOS_LOWDELAY
  # define IPTOS_LOWDELAY 0x10
-@@ -436,6 +437,18 @@ main(int argc, char *argv[])
+@@ -608,6 +609,18 @@ main(int argc, char *argv[])
  				s = local_listen(host, uport, hints);
  			if (s < 0)
  				err(1, NULL);
 +
 +			char* local;
-+			if (family == AF_INET6
++			if (family == AF_INET6)
 +				local = "0.0.0.0";
 +			else if (family == AF_INET)
 +				local = ":::";
 +			else
-+				local = "unknown"
++				local = "unknown";
 +			fprintf(stderr, "Listening on [%s] (family %d, port %d)\n",
 +				host ?: local,
 +				family,
@@ -37,7 +35,7 @@ index 9ab507a..3240a08 100644
  			/*
  			 * For UDP and -k, don't connect the socket, let it
  			 * receive datagrams from multiple socket pairs.
-@@ -452,14 +465,14 @@ main(int argc, char *argv[])
+@@ -628,14 +641,14 @@ main(int argc, char *argv[])
  				char buf[16384];
  				struct sockaddr_storage z;
  
@@ -55,4 +53,3 @@ index 9ab507a..3240a08 100644
  				if (rv < 0)
  					err(1, "connect");
  
--- 

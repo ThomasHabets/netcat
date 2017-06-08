@@ -1,6 +1,6 @@
 netcat-openbsd (1.150-1) UNRELEASED; urgency=medium
 
-  * New upstream release.
+  * New upstream release (compiled without TLS support).
   * debian/copyright: Fix license for atomicio.[ch] and socks.c (2-clause vs
     3-clause BSD). Closes: #860459.
 
