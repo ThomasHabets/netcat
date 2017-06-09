@@ -5,6 +5,8 @@ netcat-openbsd (1.178-1) UNRELEASED; urgency=medium
     3-clause BSD). Closes: #860459.
   * debian/README.source: new file showing how to import new upstream
     releases.
+  * set TCP MD5SIG correctly for client connections.  Thanks to Thomas Habets
+    for the patch.
 
  -- Guilhem Moulin <guilhem@debian.org>  Fri, 09 Jun 2017 19:48:59 +0200
 
