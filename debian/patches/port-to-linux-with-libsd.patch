@@ -3,11 +3,11 @@ Date: Mon, 13 Feb 2012 15:59:31 +0800
 Subject: port to linux with libsd
 
 ---
- Makefile |   15 ++++++++-
+ Makefile |   15 ++++++++
  nc.1     |    4 --
- netcat.c |  101 +++++++++++++++++++++++++++++++++++++++++++++++++--------------
- socks.c  |   46 ++++++++++++++--------------
- 4 files changed, 117 insertions(+), 49 deletions(-)
+ netcat.c |  108 ++++++++++++++++++++++++++++++++++++++++++++++-----------------
+ socks.c  |   46 +++++++++++++-------------
+ 4 files changed, 118 insertions(+), 55 deletions(-)
 
 --- a/Makefile
 +++ b/Makefile
@@ -32,7 +32,7 @@ Subject: port to linux with libsd
 +	rm -f $(OBJS) nc
 --- a/nc.1
 +++ b/nc.1
-@@ -188,9 +188,6 @@ Proxy authentication is only supported f
+@@ -195,9 +195,6 @@ Proxy authentication is only supported f
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -42,7 +42,7 @@ Subject: port to linux with libsd
  .It Fl R Ar CAfile
  Specifies the filename from which the root CA bundle for certificate
  verification is loaded, in PEM format.
-@@ -232,6 +229,7 @@ For IPv4 TOS value
+@@ -239,6 +236,7 @@ For IPv4 TOS value
  may be one of
  .Ar critical ,
  .Ar inetcontrol ,
@@ -61,10 +61,12 @@ Subject: port to linux with libsd
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <sys/uio.h>
-@@ -42,6 +44,46 @@
+@@ -41,6 +43,47 @@
+ #include <netinet/tcp.h>
  #include <netinet/ip.h>
  #include <arpa/telnet.h>
- 
++#include <linux/in6.h>
++
 +#ifndef IPTOS_LOWDELAY
 +# define IPTOS_LOWDELAY 0x10
 +# define IPTOS_THROUGHPUT 0x08
@@ -104,11 +106,10 @@ Subject: port to linux with libsd
 +# define	IPTOS_DSCP_EF		0xb8
 +#endif /* IPTOS_DSCP_EF */
 +
-+
+ 
  #include <err.h>
  #include <errno.h>
- #include <limits.h>
-@@ -55,6 +97,8 @@
+@@ -55,6 +98,8 @@
  #include <time.h>
  #include <unistd.h>
  #include <tls.h>
@@ -117,7 +118,7 @@ Subject: port to linux with libsd
  #include "atomicio.h"
  
  #define PORT_MAX	65535
-@@ -150,7 +194,7 @@ main(int argc, char *argv[])
+@@ -152,7 +197,7 @@ main(int argc, char *argv[])
  	struct servent *sv;
  	socklen_t len;
  	struct sockaddr_storage cliaddr;
@@ -126,7 +127,7 @@ Subject: port to linux with libsd
  	const char *errstr, *proxyhost = "", *proxyport = NULL;
  	struct addrinfo proxyhints;
  	char unix_dg_tmp_socket_buf[UNIX_DG_TMP_SOCKET_SIZE];
-@@ -252,10 +296,14 @@ main(int argc, char *argv[])
+@@ -263,10 +308,14 @@ main(int argc, char *argv[])
  			uflag = 1;
  			break;
  		case 'V':
@@ -141,7 +142,7 @@ Subject: port to linux with libsd
  			break;
  		case 'v':
  			vflag = 1;
-@@ -290,7 +338,11 @@ main(int argc, char *argv[])
+@@ -301,7 +350,11 @@ main(int argc, char *argv[])
  				    errstr, optarg);
  			break;
  		case 'S':
@@ -153,7 +154,7 @@ Subject: port to linux with libsd
  			break;
  		case 'T':
  			errstr = NULL;
-@@ -315,26 +367,23 @@ main(int argc, char *argv[])
+@@ -326,32 +379,23 @@ main(int argc, char *argv[])
  	argc -= optind;
  	argv += optind;
  
@@ -166,7 +167,13 @@ Subject: port to linux with libsd
 -		if (pledge("stdio rpath wpath cpath tmppath unix", NULL) == -1)
 -			err(1, "pledge");
 -	} else if (Fflag) {
--		if (pledge("stdio inet dns sendfd", NULL) == -1)
+-		if (Pflag) {
+-			if (pledge("stdio inet dns sendfd tty", NULL) == -1)
+-				err(1, "pledge");
+-		} else if (pledge("stdio inet dns sendfd", NULL) == -1)
+-			err(1, "pledge");
+-	} else if (Pflag) {
+-		if (pledge("stdio inet dns tty", NULL) == -1)
 -			err(1, "pledge");
 -	} else if (usetls) {
 -		if (pledge("stdio rpath inet dns", NULL) == -1)
@@ -189,7 +196,7 @@ Subject: port to linux with libsd
  	} else if (argv[0] && !argv[1]) {
  		if  (!lflag)
  			usage(1);
-@@ -346,12 +395,6 @@ main(int argc, char *argv[])
+@@ -363,12 +407,6 @@ main(int argc, char *argv[])
  	} else
  		usage(1);
  
@@ -202,7 +209,7 @@ Subject: port to linux with libsd
  	if (!lflag && kflag)
  		errx(1, "must use -l with -k");
  	if (uflag && usetls)
-@@ -382,8 +425,8 @@ main(int argc, char *argv[])
+@@ -399,8 +437,8 @@ main(int argc, char *argv[])
  		} else {
  			strlcpy(unix_dg_tmp_socket_buf, "/tmp/nc.XXXXXXXXXX",
  			    UNIX_DG_TMP_SOCKET_SIZE);
@@ -213,7 +220,7 @@ Subject: port to linux with libsd
  			unix_dg_tmp_socket = unix_dg_tmp_socket_buf;
  		}
  	}
-@@ -822,8 +865,10 @@ remote_connect(const char *host, const c
+@@ -847,8 +885,10 @@ remote_connect(const char *host, const c
  		if (sflag || pflag) {
  			struct addrinfo ahints, *ares;
  
@@ -224,7 +231,7 @@ Subject: port to linux with libsd
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res0->ai_family;
  			ahints.ai_socktype = uflag ? SOCK_DGRAM : SOCK_STREAM;
-@@ -914,9 +959,15 @@ local_listen(char *host, char *port, str
+@@ -941,9 +981,15 @@ local_listen(char *host, char *port, str
  		    res0->ai_protocol)) < 0)
  			continue;
  
@@ -240,7 +247,7 @@ Subject: port to linux with libsd
  
  		set_common_sockopts(s, res0->ai_family);
  
-@@ -1356,11 +1407,13 @@ set_common_sockopts(int s, int af)
+@@ -1401,11 +1447,13 @@ set_common_sockopts(int s, int af)
  {
  	int x = 1;
  
@@ -254,7 +261,7 @@ Subject: port to linux with libsd
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
-@@ -1423,6 +1476,7 @@ map_tos(char *s, int *val)
+@@ -1483,6 +1531,7 @@ map_tos(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -262,7 +269,7 @@ Subject: port to linux with libsd
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -1515,6 +1569,9 @@ report_connect(const struct sockaddr *sa
+@@ -1580,6 +1629,9 @@ report_connect(const struct sockaddr *sa
  void
  help(void)
  {
@@ -272,7 +279,7 @@ Subject: port to linux with libsd
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -1552,7 +1609,7 @@ help(void)
+@@ -1619,7 +1671,7 @@ help(void)
  	\t-x addr[:port]\tSpecify proxy address and port\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");

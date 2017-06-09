@@ -13,10 +13,10 @@ Subject: verbose numeric port
  #include <netinet/ip.h>
  #include <arpa/telnet.h>
 +#include <arpa/inet.h>
+ #include <linux/in6.h>
  
  #ifndef IPTOS_LOWDELAY
- # define IPTOS_LOWDELAY 0x10
-@@ -608,6 +609,18 @@ main(int argc, char *argv[])
+@@ -623,6 +624,18 @@ main(int argc, char *argv[])
  				s = local_listen(host, uport, hints);
  			if (s < 0)
  				err(1, NULL);
@@ -35,7 +35,7 @@ Subject: verbose numeric port
  			/*
  			 * For UDP and -k, don't connect the socket, let it
  			 * receive datagrams from multiple socket pairs.
-@@ -628,14 +641,14 @@ main(int argc, char *argv[])
+@@ -643,14 +656,14 @@ main(int argc, char *argv[])
  				char buf[16384];
  				struct sockaddr_storage z;
  

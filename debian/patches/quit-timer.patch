@@ -4,12 +4,12 @@ Subject: quit timer
 
 ---
  nc.1     |   10 ++++++++++
- netcat.c |   42 +++++++++++++++++++++++++++++++++++-------
- 2 files changed, 45 insertions(+), 7 deletions(-)
+ netcat.c |   40 ++++++++++++++++++++++++++++++++++------
+ 2 files changed, 44 insertions(+), 6 deletions(-)
 
 --- a/nc.1
 +++ b/nc.1
-@@ -39,6 +39,7 @@
+@@ -41,6 +41,7 @@
  .Op Fl O Ar length
  .Op Fl P Ar proxy_username
  .Op Fl p Ar source_port
@@ -17,7 +17,7 @@ Subject: quit timer
  .Op Fl s Ar source
  .Op Fl T Ar keyword
  .Op Fl V Ar rtable
-@@ -166,6 +167,15 @@ Proxy authentication is only supported f
+@@ -173,6 +174,15 @@ Proxy authentication is only supported f
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -35,7 +35,7 @@ Subject: quit timer
  instead of sequentially within a range or in the order that the system
 --- a/netcat.c
 +++ b/netcat.c
-@@ -135,6 +135,7 @@ int	Nflag;					/* shutdown() network soc
+@@ -136,6 +136,7 @@ int	Nflag;					/* shutdown() network soc
  int	nflag;					/* Don't do name look up */
  char   *Pflag;					/* Proxy username */
  char   *pflag;					/* Localport flag */
@@ -43,7 +43,7 @@ Subject: quit timer
  int	rflag;					/* Random ports flag */
  char   *sflag;					/* Source Address */
  int	tflag;					/* Telnet Emulation */
-@@ -214,6 +215,8 @@ ssize_t fillbuf(int, unsigned char *, si
+@@ -217,6 +218,8 @@ ssize_t fillbuf(int, unsigned char *, si
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
  
@@ -52,19 +52,19 @@ Subject: quit timer
  int
  main(int argc, char *argv[])
  {
-@@ -243,9 +246,9 @@ main(int argc, char *argv[])
+@@ -245,9 +248,9 @@ main(int argc, char *argv[])
  
  	while ((ch = getopt(argc, argv,
  # if defined(TLS)
--	    "46C:cDde:FH:hI:i:K:klNnO:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
-+	    "46C:cDde:FH:hI:i:K:klNnO:P:p:q:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
+-	    "46C:cDde:FH:hI:i:K:klM:m:NnO:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
++	    "46C:cDde:FH:hI:i:K:klM:m:NnO:P:p:q:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
  # else
--	    "46CDdFhI:i:klNnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
-+	    "46CDdFhI:i:klNnO:P:p:q:rSs:T:tUuV:vw:X:x:z")) != -1) {
+- 	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
++	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vw:X:x:z")) != -1) {
  # endif
  		switch (ch) {
  		case '4':
-@@ -326,6 +329,13 @@ main(int argc, char *argv[])
+@@ -338,6 +341,13 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -78,7 +78,7 @@ Subject: quit timer
  # if defined(TLS)
  		case 'R':
  			tls_cachanged = 1;
-@@ -1193,18 +1203,26 @@ readwrite(int net_fd)
+@@ -1217,18 +1227,26 @@ readwrite(int net_fd)
  		if (pfd[POLL_STDIN].fd == -1 && pfd[POLL_NETIN].fd == -1 &&
  		    stdinbufpos == 0 && netinbufpos == 0) {
  			close(net_fd);
@@ -108,7 +108,7 @@ Subject: quit timer
  		}
  
  		/* poll */
-@@ -1802,6 +1820,7 @@ help(void)
+@@ -1864,6 +1882,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -116,14 +116,13 @@ Subject: quit timer
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s source	Local source address\n\
-@@ -1824,9 +1843,18 @@ usage(int ret)
+@@ -1886,9 +1905,18 @@ usage(int ret)
  {
  	fprintf(stderr,
- 	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
--	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T keyword]\n"
--	    "\t  [-V rtable] [-w timeout] [-X proxy_protocol]\n"
-+	    "\t  [-P proxy_username] [-p source_port] [-q seconds] [-s source]\n"
-+	    "\t  [-T keyword] [-V rtable] [-w timeout] [-X proxy_protocol]\n"
+ 	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
+-	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
++	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port] [-q seconds]\n"
+ 	    "\t  [-s source] [-T keyword] [-V rtable] [-w timeout] [-X proxy_protocol]\n"
  	    "\t  [-x proxy_address[:port]] [destination] [port]\n");
  	if (ret)
  		exit(1);

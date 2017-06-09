@@ -8,12 +8,11 @@ Subject: get sev by name
 
 --- a/netcat.c
 +++ b/netcat.c
-@@ -1528,12 +1528,17 @@ atelnet(int nfd, unsigned char *buf, uns
+@@ -1573,11 +1573,16 @@ strtoport(char *portstr, int udp)
  void
  build_ports(char *p)
  {
 +	struct servent *sv;
- 	const char *errstr;
  	char *n;
  	int hi, lo, cp;
  	int x = 0;

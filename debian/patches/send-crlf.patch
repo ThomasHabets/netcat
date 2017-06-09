@@ -17,8 +17,8 @@ Subject: send crlf
 +.Op Fl 46CDdFhklNnrStUuvz
  .Op Fl I Ar length
  .Op Fl i Ar interval
- .Op Fl O Ar length
-@@ -93,6 +93,8 @@ to use IPv4 addresses only.
+ .Op Fl M Ar ttl
+@@ -95,6 +95,8 @@ to use IPv4 addresses only.
  Forces
  .Nm
  to use IPv6 addresses only.
@@ -27,7 +27,7 @@ Subject: send crlf
  .It Fl D
  Enable debugging on the socket.
  .It Fl d
-@@ -369,7 +371,7 @@ More complicated examples can be built u
+@@ -376,7 +378,7 @@ More complicated examples can be built u
  of requests required by the server.
  As another example, an email may be submitted to an SMTP server using:
  .Bd -literal -offset indent
@@ -38,7 +38,7 @@ Subject: send crlf
  RCPT TO:\*(Ltuser2@host.example.com\*(Gt
 --- a/netcat.c
 +++ b/netcat.c
-@@ -164,6 +164,8 @@ uint8_t *privkey;
+@@ -165,6 +165,8 @@ uint8_t *privkey;
  size_t  privkeylen;
  uint8_t *pubcert;
  size_t  pubcertlen;
@@ -47,7 +47,7 @@ Subject: send crlf
  # endif
  
  int timeout = -1;
-@@ -205,7 +207,7 @@ ssize_t fillbuf(int, unsigned char *, si
+@@ -208,7 +210,7 @@ ssize_t fillbuf(int, unsigned char *, si
  void tls_setup_client(struct tls *, int, char *);
  struct tls *tls_setup_server(struct tls *, int, char *);
  # else
@@ -56,16 +56,16 @@ Subject: send crlf
  ssize_t fillbuf(int, unsigned char *, size_t *);
  # endif
  
-@@ -243,7 +245,7 @@ main(int argc, char *argv[])
+@@ -245,7 +247,7 @@ main(int argc, char *argv[])
  # if defined(TLS)
- 	    "46C:cDde:FH:hI:i:K:klNnO:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
+ 	    "46C:cDde:FH:hI:i:K:klM:m:NnO:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
  # else
--	    "46DdFhI:i:klNnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
-+	    "46CDdFhI:i:klNnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
+-	    "46DdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
++ 	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
  # endif
  		switch (ch) {
  		case '4':
-@@ -272,6 +274,10 @@ main(int argc, char *argv[])
+@@ -274,6 +276,10 @@ main(int argc, char *argv[])
  		case 'c':
  			usetls = 1;
  			break;
@@ -76,7 +76,7 @@ Subject: send crlf
  # endif
  		case 'd':
  			dflag = 1;
-@@ -1201,12 +1207,6 @@ readwrite(int net_fd)
+@@ -1225,12 +1231,6 @@ readwrite(int net_fd)
  			return;
  		}
  
@@ -89,7 +89,7 @@ Subject: send crlf
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
  
-@@ -1288,7 +1288,7 @@ readwrite(int net_fd)
+@@ -1312,7 +1312,7 @@ readwrite(int net_fd)
  				pfd[POLL_NETOUT].events = POLLOUT;
  			else
  # else
@@ -98,7 +98,7 @@ Subject: send crlf
  # endif
  			if (ret == -1)
  				pfd[POLL_NETOUT].fd = -1;
-@@ -1341,7 +1341,7 @@ readwrite(int net_fd)
+@@ -1365,7 +1365,7 @@ readwrite(int net_fd)
  				pfd[POLL_STDOUT].events = POLLOUT;
  			else
  # else
@@ -107,7 +107,7 @@ Subject: send crlf
  # endif
  			if (ret == -1)
  				pfd[POLL_STDOUT].fd = -1;
-@@ -1367,31 +1367,40 @@ readwrite(int net_fd)
+@@ -1391,31 +1391,40 @@ readwrite(int net_fd)
  }
  
  ssize_t
@@ -168,7 +168,7 @@ Subject: send crlf
  	/* adjust buffer */
  	adjust = *bufpos - n;
  	if (adjust > 0)
-@@ -1779,6 +1788,7 @@ help(void)
+@@ -1839,6 +1848,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -176,12 +176,12 @@ Subject: send crlf
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
  	\t-F		Pass socket fd\n\
-@@ -1813,7 +1823,7 @@ void
+@@ -1875,7 +1885,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,
--	    "usage: nc [-46DdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
-+	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-O length]\n"
- 	    "\t  [-P proxy_username] [-p source_port] [-s source] [-T keyword]\n"
- 	    "\t  [-V rtable] [-w timeout] [-X proxy_protocol]\n"
+-	    "usage: nc [-46DdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
++	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
+ 	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
+ 	    "\t  [-s source] [-T keyword] [-V rtable] [-w timeout] [-X proxy_protocol]\n"
  	    "\t  [-x proxy_address[:port]] [destination] [port]\n");
