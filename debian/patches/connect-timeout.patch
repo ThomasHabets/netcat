@@ -16,8 +16,8 @@ Subject: connect timeout
  #include <limits.h>
  #include <netdb.h>
  #include <poll.h>
-@@ -121,6 +122,10 @@
- # define TLS_CCERT	(1 << 4)
+@@ -122,6 +123,10 @@
+ # define TLS_MUSTSTAPLE	(1 << 5)
  #endif
  
 +#define CONNECTION_SUCCESS 0
@@ -27,7 +27,7 @@ Subject: connect timeout
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
-@@ -207,6 +212,9 @@ ssize_t drainbuf(int, unsigned char *, s
+@@ -206,6 +211,9 @@ ssize_t drainbuf(int, unsigned char *, s
  ssize_t fillbuf(int, unsigned char *, size_t *);
  # endif
  
@@ -37,12 +37,12 @@ Subject: connect timeout
  int
  main(int argc, char *argv[])
  {
-@@ -983,11 +991,14 @@ remote_connect(const char *host, const c
+@@ -1020,11 +1028,14 @@ remote_connect(const char *host, const c
  
- 		set_common_sockopts(s, res0->ai_family);
+ 		set_common_sockopts(s, res->ai_family);
  
--		if (timeout_connect(s, res0->ai_addr, res0->ai_addrlen) == 0)
-+		if ((error = connect_with_timeout(s, res0->ai_addr, res0->ai_addrlen, timeout)) == CONNECTION_SUCCESS)
+-		if (timeout_connect(s, res->ai_addr, res->ai_addrlen) == 0)
++		if ((error = connect_with_timeout(s, res->ai_addr, res->ai_addrlen, timeout)) == CONNECTION_SUCCESS)
  			break;
 -		if (vflag)
 +		if (vflag && error == CONNECTION_FAILED)
@@ -54,7 +54,7 @@ Subject: connect timeout
  
  		save_errno = errno;
  		close(s);
-@@ -1028,6 +1039,69 @@ timeout_connect(int s, const struct sock
+@@ -1065,6 +1076,69 @@ timeout_connect(int s, const struct sock
  	return (ret);
  }
  

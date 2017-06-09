@@ -4,8 +4,8 @@ Subject: quit timer
 
 ---
  nc.1     |   10 ++++++++++
- netcat.c |   40 ++++++++++++++++++++++++++++++++++------
- 2 files changed, 44 insertions(+), 6 deletions(-)
+ netcat.c |   50 +++++++++++++++++++++++++++++++++++++++++---------
+ 2 files changed, 51 insertions(+), 9 deletions(-)
 
 --- a/nc.1
 +++ b/nc.1
@@ -35,7 +35,7 @@ Subject: quit timer
  instead of sequentially within a range or in the order that the system
 --- a/netcat.c
 +++ b/netcat.c
-@@ -136,6 +136,7 @@ int	Nflag;					/* shutdown() network soc
+@@ -137,6 +137,7 @@ int	Nflag;					/* shutdown() network soc
  int	nflag;					/* Don't do name look up */
  char   *Pflag;					/* Proxy username */
  char   *pflag;					/* Localport flag */
@@ -43,7 +43,7 @@ Subject: quit timer
  int	rflag;					/* Random ports flag */
  char   *sflag;					/* Source Address */
  int	tflag;					/* Telnet Emulation */
-@@ -217,6 +218,8 @@ ssize_t fillbuf(int, unsigned char *, si
+@@ -216,6 +217,8 @@ ssize_t fillbuf(int, unsigned char *, si
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
  
@@ -52,19 +52,19 @@ Subject: quit timer
  int
  main(int argc, char *argv[])
  {
-@@ -245,9 +248,9 @@ main(int argc, char *argv[])
+@@ -244,9 +247,9 @@ main(int argc, char *argv[])
  
  	while ((ch = getopt(argc, argv,
  # if defined(TLS)
--	    "46C:cDde:FH:hI:i:K:klM:m:NnO:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
-+	    "46C:cDde:FH:hI:i:K:klM:m:NnO:P:p:q:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
+-	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
++	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:q:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
  # else
 - 	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
 +	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vw:X:x:z")) != -1) {
  # endif
  		switch (ch) {
  		case '4':
-@@ -338,6 +341,13 @@ main(int argc, char *argv[])
+@@ -337,6 +340,13 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -78,37 +78,41 @@ Subject: quit timer
  # if defined(TLS)
  		case 'R':
  			tls_cachanged = 1;
-@@ -1217,18 +1227,26 @@ readwrite(int net_fd)
+@@ -1251,15 +1261,27 @@ readwrite(int net_fd)
+ 	while (1) {
+ 		/* both inputs are gone, buffers are empty, we are done */
  		if (pfd[POLL_STDIN].fd == -1 && pfd[POLL_NETIN].fd == -1 &&
- 		    stdinbufpos == 0 && netinbufpos == 0) {
- 			close(net_fd);
+-		    stdinbufpos == 0 && netinbufpos == 0)
 -			return;
++ 		    stdinbufpos == 0 && netinbufpos == 0) {
 +			if (qflag <= 0)
 +				return;
 +			goto delay_exit;
- 		}
++		}
  		/* both outputs are gone, we can't continue */
- 		if (pfd[POLL_NETOUT].fd == -1 && pfd[POLL_STDOUT].fd == -1) {
- 			close(net_fd);
+-		if (pfd[POLL_NETOUT].fd == -1 && pfd[POLL_STDOUT].fd == -1)
 -			return;
++		if (pfd[POLL_NETOUT].fd == -1 && pfd[POLL_STDOUT].fd == -1) {
 +			if (qflag <= 0)
 +				return;
 +			goto delay_exit;
- 		}
++ 		}
  		/* listen and net in gone, queues empty, done */
  		if (lflag && pfd[POLL_NETIN].fd == -1 &&
- 		    stdinbufpos == 0 && netinbufpos == 0) {
- 			close(net_fd);
+-		    stdinbufpos == 0 && netinbufpos == 0)
 -			return;
++		    stdinbufpos == 0 && netinbufpos == 0) {
 +			if (qflag <= 0)
 +				return;
 +delay_exit:
++			close(net_fd);
 +			signal(SIGALRM, quit);
 +			alarm(qflag);
- 		}
++ 		}
  
  		/* poll */
-@@ -1864,6 +1882,7 @@ help(void)
+ 		num_fds = poll(pfd, 4, timeout);
+@@ -1928,6 +1950,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -116,13 +120,13 @@ Subject: quit timer
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s source	Local source address\n\
-@@ -1886,9 +1905,18 @@ usage(int ret)
- {
+@@ -1951,9 +1974,18 @@ usage(int ret)
  	fprintf(stderr,
  	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
--	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
-+	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port] [-q seconds]\n"
- 	    "\t  [-s source] [-T keyword] [-V rtable] [-w timeout] [-X proxy_protocol]\n"
+ 	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
+-	    "\t  [-s source] [-T keyword] [-V rtable] [-w timeout] "
++	    "\t  [-q seconds] [-s source] [-T keyword] [-V rtable] [-w timeout] "
+ 	    "[-X proxy_protocol]\n"
  	    "\t  [-x proxy_address[:port]] [destination] [port]\n");
  	if (ret)
  		exit(1);

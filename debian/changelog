@@ -1,4 +1,4 @@
-netcat-openbsd (1.160-1) UNRELEASED; urgency=medium
+netcat-openbsd (1.178-1) UNRELEASED; urgency=medium
 
   * New upstream release (compiled without TLS support).
   * debian/copyright: Fix license for atomicio.[ch] and socks.c (2-clause vs
@@ -6,7 +6,7 @@ netcat-openbsd (1.160-1) UNRELEASED; urgency=medium
   * debian/README.source: new file showing how to import new upstream
     releases.
 
- -- Guilhem Moulin <guilhem@debian.org>  Fri, 09 Jun 2017 18:08:29 +0200
+ -- Guilhem Moulin <guilhem@debian.org>  Fri, 09 Jun 2017 19:48:59 +0200
 
 netcat-openbsd (1.130-3) unstable; urgency=medium
 

@@ -40,7 +40,7 @@ Subject: misc failures and features
  .It Fl C
  Send CRLF as line-ending.
  .It Fl D
-@@ -349,6 +351,54 @@ and which side is being used as a
+@@ -352,6 +354,54 @@ and which side is being used as a
  The connection may be terminated using an
  .Dv EOF
  .Pq Sq ^D .
@@ -95,7 +95,7 @@ Subject: misc failures and features
  .Sh DATA TRANSFER
  The example in the previous section can be expanded to build a
  basic data transfer model.
-@@ -408,15 +458,30 @@ The
+@@ -411,15 +461,30 @@ The
  flag can be used to tell
  .Nm
  to report open ports,
@@ -129,7 +129,7 @@ Subject: misc failures and features
  .Pp
  Alternatively, it might be useful to know which server software
  is running, and which versions.
-@@ -481,6 +546,9 @@ Original implementation by *Hobbit*
+@@ -484,6 +549,9 @@ Original implementation by *Hobbit*
  .br
  Rewritten with IPv6 support by
  .An Eric Jackson Aq Mt ericj@monkey.org .
@@ -149,7 +149,7 @@ Subject: misc failures and features
  #include <stdarg.h>
  #include <stdio.h>
  #include <stdlib.h>
-@@ -130,6 +131,7 @@
+@@ -131,6 +132,7 @@
  #define UDP_SCAN_TIMEOUT 3			/* Seconds */
  
  /* Command Line Options */
@@ -157,7 +157,7 @@ Subject: misc failures and features
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
  unsigned int iflag;				/* Interval Flag */
-@@ -182,7 +184,7 @@ int ttl = -1;
+@@ -178,7 +180,7 @@ int ttl = -1;
  int minttl = -1;
  
  void	atelnet(int, unsigned char *, unsigned int);
@@ -166,7 +166,7 @@ Subject: misc failures and features
  void	help(void);
  int	local_listen(char *, char *, struct addrinfo);
  # if defined(TLS)
-@@ -229,11 +231,14 @@ int
+@@ -228,11 +230,14 @@ int
  main(int argc, char *argv[])
  {
  	int ch, s = -1, ret, socksv;
@@ -180,22 +180,22 @@ Subject: misc failures and features
 +		struct sockaddr_storage storage;
 +		struct sockaddr_un forunix;
 +	} cliaddr;
- 	char *proxy = NULL;
- 	const char *errstr, *proxyhost = "", *proxyport = NULL;
+ 	char *proxy, *proxyport = NULL;
+ 	const char *errstr;
  	struct addrinfo proxyhints;
-@@ -253,9 +258,9 @@ main(int argc, char *argv[])
+@@ -252,9 +257,9 @@ main(int argc, char *argv[])
  
  	while ((ch = getopt(argc, argv,
  # if defined(TLS)
--	    "46C:cDde:FH:hI:i:K:klM:m:NnO:P:p:q:R:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
-+	    "46bC:cDde:FH:hI:i:K:klM:m:NnO:P:p:q:R:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
+-	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:q:R:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
++	    "46bC:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:q:R:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
  # else
 -	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
 +	    "46bCDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
  # endif
  		switch (ch) {
  		case '4':
-@@ -264,6 +269,13 @@ main(int argc, char *argv[])
+@@ -263,6 +268,13 @@ main(int argc, char *argv[])
  		case '6':
  			family = AF_INET6;
  			break;
@@ -209,7 +209,7 @@ Subject: misc failures and features
  		case 'U':
  			family = AF_UNIX;
  			break;
-@@ -464,32 +476,39 @@ main(int argc, char *argv[])
+@@ -468,32 +480,39 @@ main(int argc, char *argv[])
  
  	/* Cruft to make sure options are clean, and used properly. */
  	if (argv[0] && !argv[1] && family == AF_UNIX) {
@@ -263,7 +263,7 @@ Subject: misc failures and features
  	if (!lflag && kflag)
  		errx(1, "must use -l with -k");
  # if defined(TLS)
-@@ -637,7 +656,7 @@ main(int argc, char *argv[])
+@@ -663,7 +682,7 @@ main(int argc, char *argv[])
  			else
  				s = unix_listen(host);
  		} else
@@ -272,7 +272,7 @@ Subject: misc failures and features
  		if (s < 0)
  			err(1, NULL);
  
-@@ -646,7 +665,8 @@ main(int argc, char *argv[])
+@@ -672,7 +691,8 @@ main(int argc, char *argv[])
  			local = ":::";
  		else
  			local = "0.0.0.0";
@@ -282,7 +282,7 @@ Subject: misc failures and features
  			host ?: local,
  			family,
  			*uport);
-@@ -870,6 +890,8 @@ unix_bind(char *path, int flags)
+@@ -887,6 +907,8 @@ unix_bind(char *path, int flags)
  	    0)) < 0)
  		return (-1);
  
@@ -291,7 +291,7 @@ Subject: misc failures and features
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
  	s_un.sun_family = AF_UNIX;
  
-@@ -967,8 +989,10 @@ unix_connect(char *path)
+@@ -1004,8 +1026,10 @@ unix_connect(char *path)
  		if ((s = unix_bind(unix_dg_tmp_socket, SOCK_CLOEXEC)) < 0)
  			return (-1);
  	} else {
@@ -303,7 +303,7 @@ Subject: misc failures and features
  	}
  
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
-@@ -978,10 +1002,12 @@ unix_connect(char *path)
+@@ -1015,10 +1039,12 @@ unix_connect(char *path)
  	    sizeof(s_un.sun_path)) {
  		close(s);
  		errno = ENAMETOOLONG;
@@ -316,7 +316,7 @@ Subject: misc failures and features
  		close(s);
  		errno = save_errno;
  		return (-1);
-@@ -1675,25 +1701,26 @@ strtoport(char *portstr, int udp)
+@@ -1707,25 +1733,26 @@ strtoport(char *portstr, int udp)
   * that we should try to connect to.
   */
  void
@@ -347,7 +347,7 @@ Subject: misc failures and features
  		if (lo > hi) {
  			cp = hi;
  			hi = lo;
-@@ -1721,7 +1748,7 @@ build_ports(char *p)
+@@ -1753,7 +1780,7 @@ build_ports(char *p)
  	} else {
  		char *tmp;
  
@@ -356,7 +356,7 @@ Subject: misc failures and features
  		if (asprintf(&tmp, "%d", hi) != -1)
  			portlist[0] = tmp;
  		else
-@@ -1758,6 +1785,15 @@ set_common_sockopts(int s, int af)
+@@ -1790,6 +1817,15 @@ set_common_sockopts(int s, int af)
  {
  	int x = 1;
  
@@ -372,7 +372,7 @@ Subject: misc failures and features
  # if defined(TCP_MD5SIG)
  	if (Sflag) {
  		if (setsockopt(s, IPPROTO_TCP, TCP_MD5SIG,
-@@ -1949,6 +1985,7 @@ help(void)
+@@ -2017,6 +2053,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\

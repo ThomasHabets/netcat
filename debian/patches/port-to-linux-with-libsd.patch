@@ -5,9 +5,9 @@ Subject: port to linux with libsd
 ---
  Makefile |   15 ++++++++
  nc.1     |    4 --
- netcat.c |  108 ++++++++++++++++++++++++++++++++++++++++++++++-----------------
- socks.c  |   46 +++++++++++++-------------
- 4 files changed, 118 insertions(+), 55 deletions(-)
+ netcat.c |  106 ++++++++++++++++++++++++++++++++++++++++++++++-----------------
+ socks.c  |   46 +++++++++++++--------------
+ 4 files changed, 117 insertions(+), 54 deletions(-)
 
 --- a/Makefile
 +++ b/Makefile
@@ -32,7 +32,7 @@ Subject: port to linux with libsd
 +	rm -f $(OBJS) nc
 --- a/nc.1
 +++ b/nc.1
-@@ -195,9 +195,6 @@ Proxy authentication is only supported f
+@@ -202,9 +202,6 @@ Proxy authentication is only supported f
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -42,7 +42,7 @@ Subject: port to linux with libsd
  .It Fl R Ar CAfile
  Specifies the filename from which the root CA bundle for certificate
  verification is loaded, in PEM format.
-@@ -239,6 +236,7 @@ For IPv4 TOS value
+@@ -249,6 +246,7 @@ For IPv4 TOS value
  may be one of
  .Ar critical ,
  .Ar inetcontrol ,
@@ -118,16 +118,7 @@ Subject: port to linux with libsd
  #include "atomicio.h"
  
  #define PORT_MAX	65535
-@@ -152,7 +197,7 @@ main(int argc, char *argv[])
- 	struct servent *sv;
- 	socklen_t len;
- 	struct sockaddr_storage cliaddr;
--	char *proxy;
-+	char *proxy = NULL;
- 	const char *errstr, *proxyhost = "", *proxyport = NULL;
- 	struct addrinfo proxyhints;
- 	char unix_dg_tmp_socket_buf[UNIX_DG_TMP_SOCKET_SIZE];
-@@ -263,10 +308,14 @@ main(int argc, char *argv[])
+@@ -260,10 +305,14 @@ main(int argc, char *argv[])
  			uflag = 1;
  			break;
  		case 'V':
@@ -143,7 +134,7 @@ Subject: port to linux with libsd
  		case 'v':
  			vflag = 1;
 @@ -301,7 +350,11 @@ main(int argc, char *argv[])
- 				    errstr, optarg);
+ 			oflag = optarg;
  			break;
  		case 'S':
 +# if defined(TCP_MD5SIG)
@@ -209,7 +200,7 @@ Subject: port to linux with libsd
  	if (!lflag && kflag)
  		errx(1, "must use -l with -k");
  	if (uflag && usetls)
-@@ -399,8 +437,8 @@ main(int argc, char *argv[])
+@@ -401,8 +439,8 @@ main(int argc, char *argv[])
  		} else {
  			strlcpy(unix_dg_tmp_socket_buf, "/tmp/nc.XXXXXXXXXX",
  			    UNIX_DG_TMP_SOCKET_SIZE);
@@ -220,7 +211,7 @@ Subject: port to linux with libsd
  			unix_dg_tmp_socket = unix_dg_tmp_socket_buf;
  		}
  	}
-@@ -847,8 +885,10 @@ remote_connect(const char *host, const c
+@@ -880,8 +918,10 @@ remote_connect(const char *host, const c
  		if (sflag || pflag) {
  			struct addrinfo ahints, *ares;
  
@@ -229,10 +220,10 @@ Subject: port to linux with libsd
  			setsockopt(s, SOL_SOCKET, SO_BINDANY, &on, sizeof(on));
 +# endif
  			memset(&ahints, 0, sizeof(struct addrinfo));
- 			ahints.ai_family = res0->ai_family;
+ 			ahints.ai_family = res->ai_family;
  			ahints.ai_socktype = uflag ? SOCK_DGRAM : SOCK_STREAM;
-@@ -941,9 +981,15 @@ local_listen(char *host, char *port, str
- 		    res0->ai_protocol)) < 0)
+@@ -973,9 +1013,15 @@ local_listen(char *host, char *port, str
+ 		    res->ai_protocol)) < 0)
  			continue;
  
 +		ret = setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &x, sizeof(x));
@@ -245,9 +236,9 @@ Subject: port to linux with libsd
  			err(1, NULL);
 +# endif
  
- 		set_common_sockopts(s, res0->ai_family);
+ 		set_common_sockopts(s, res->ai_family);
  
-@@ -1401,11 +1447,13 @@ set_common_sockopts(int s, int af)
+@@ -1425,11 +1471,13 @@ set_common_sockopts(int s, int af)
  {
  	int x = 1;
  
@@ -261,7 +252,7 @@ Subject: port to linux with libsd
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
-@@ -1483,6 +1531,7 @@ map_tos(char *s, int *val)
+@@ -1507,6 +1555,7 @@ map_tos(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -269,7 +260,7 @@ Subject: port to linux with libsd
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -1580,6 +1629,9 @@ report_connect(const struct sockaddr *sa
+@@ -1640,6 +1689,9 @@ report_connect(const struct sockaddr *sa
  void
  help(void)
  {
@@ -279,7 +270,7 @@ Subject: port to linux with libsd
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -1619,7 +1671,7 @@ help(void)
+@@ -1680,7 +1732,7 @@ help(void)
  	\t-x addr[:port]\tSpecify proxy address and port\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");

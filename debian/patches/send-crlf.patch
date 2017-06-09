@@ -27,7 +27,7 @@ Subject: send crlf
  .It Fl D
  Enable debugging on the socket.
  .It Fl d
-@@ -376,7 +378,7 @@ More complicated examples can be built u
+@@ -379,7 +381,7 @@ More complicated examples can be built u
  of requests required by the server.
  As another example, an email may be submitted to an SMTP server using:
  .Bd -literal -offset indent
@@ -38,17 +38,17 @@ Subject: send crlf
  RCPT TO:\*(Ltuser2@host.example.com\*(Gt
 --- a/netcat.c
 +++ b/netcat.c
-@@ -165,6 +165,8 @@ uint8_t *privkey;
- size_t  privkeylen;
- uint8_t *pubcert;
- size_t  pubcertlen;
+@@ -161,6 +161,8 @@ int	tls_cachanged;				/* Using non-defau
+ int     TLSopt;					/* TLS options */
+ char	*tls_expectname;			/* required name in peer cert */
+ char	*tls_expecthash;			/* required hash of peer cert */
 +# else
 +int	Cflag = 0;			/* CRLF line-ending */
  # endif
  
  int timeout = -1;
-@@ -208,7 +210,7 @@ ssize_t fillbuf(int, unsigned char *, si
- void tls_setup_client(struct tls *, int, char *);
+@@ -207,7 +209,7 @@ ssize_t fillbuf(int, unsigned char *, si
+ void	tls_setup_client(struct tls *, int, char *);
  struct tls *tls_setup_server(struct tls *, int, char *);
  # else
 -ssize_t drainbuf(int, unsigned char *, size_t *);
@@ -56,16 +56,16 @@ Subject: send crlf
  ssize_t fillbuf(int, unsigned char *, size_t *);
  # endif
  
-@@ -245,7 +247,7 @@ main(int argc, char *argv[])
+@@ -244,7 +246,7 @@ main(int argc, char *argv[])
  # if defined(TLS)
- 	    "46C:cDde:FH:hI:i:K:klM:m:NnO:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
+ 	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
  # else
 -	    "46DdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
 + 	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
  # endif
  		switch (ch) {
  		case '4':
-@@ -274,6 +276,10 @@ main(int argc, char *argv[])
+@@ -273,6 +275,10 @@ main(int argc, char *argv[])
  		case 'c':
  			usetls = 1;
  			break;
@@ -76,9 +76,9 @@ Subject: send crlf
  # endif
  		case 'd':
  			dflag = 1;
-@@ -1225,12 +1231,6 @@ readwrite(int net_fd)
+@@ -1255,12 +1261,6 @@ readwrite(int net_fd)
+ 		    stdinbufpos == 0 && netinbufpos == 0)
  			return;
- 		}
  
 -		/* help says -i is for "wait between lines sent". We read and
 -		 * write arbitrary amounts of data, and we don't want to start
@@ -89,7 +89,7 @@ Subject: send crlf
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
  
-@@ -1312,7 +1312,7 @@ readwrite(int net_fd)
+@@ -1340,7 +1340,7 @@ readwrite(int net_fd)
  				pfd[POLL_NETOUT].events = POLLOUT;
  			else
  # else
@@ -98,7 +98,7 @@ Subject: send crlf
  # endif
  			if (ret == -1)
  				pfd[POLL_NETOUT].fd = -1;
-@@ -1365,7 +1365,7 @@ readwrite(int net_fd)
+@@ -1393,7 +1393,7 @@ readwrite(int net_fd)
  				pfd[POLL_STDOUT].events = POLLOUT;
  			else
  # else
@@ -107,7 +107,7 @@ Subject: send crlf
  # endif
  			if (ret == -1)
  				pfd[POLL_STDOUT].fd = -1;
-@@ -1391,31 +1391,40 @@ readwrite(int net_fd)
+@@ -1419,31 +1419,40 @@ readwrite(int net_fd)
  }
  
  ssize_t
@@ -168,7 +168,7 @@ Subject: send crlf
  	/* adjust buffer */
  	adjust = *bufpos - n;
  	if (adjust > 0)
-@@ -1839,6 +1848,7 @@ help(void)
+@@ -1903,6 +1912,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -176,12 +176,12 @@ Subject: send crlf
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
  	\t-F		Pass socket fd\n\
-@@ -1875,7 +1885,7 @@ void
+@@ -1939,7 +1949,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,
 -	    "usage: nc [-46DdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
 +	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
  	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
- 	    "\t  [-s source] [-T keyword] [-V rtable] [-w timeout] [-X proxy_protocol]\n"
- 	    "\t  [-x proxy_address[:port]] [destination] [port]\n");
+ 	    "\t  [-s source] [-T keyword] [-V rtable] [-w timeout] "
+ 	    "[-X proxy_protocol]\n"
