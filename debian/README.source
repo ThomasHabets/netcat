@@ -1,0 +1,38 @@
+Importing a new upstream release
+
+ 1. Download the OpenBSD tarball and verify its integrity
+
+   $ OPENBSD_VERSION=5.9
+   $ cd $XDG_RUNTIME_DIR
+   $ rsync -v rsync://ftp.eu.openbsd.org/OpenBSD/$OPENBSD_VERSION/{src.tar.gz,SHA256.sig} .
+ 
+ 2. Verify its integrity (requires signify-openbsd and signify-openbsd-keys packages)
+
+   $ PUBKEY="/usr/share/signify-openbsd-keys/openbsd-${OPENBSD_VERSION//./}-base.pub"
+   $ signify-openbsd -p "$PUBKEY" -Cx SHA256.sig src.tar.gz 
+   Signature Verified
+   src.tar.gz: OK
+
+ 3. Extract to the netcat repo (branch upstream)
+
+   $ cd /path/to/repos/netcat
+   $ git checkout upstream
+   $ git rm -r .
+   $ ls # ensure there are no left-overs
+   $ tar --extract --exclude CVS --exclude obj --strip-components=3 -vzf "$XDG_RUNTIME_DIR/src.tar.gz" ./usr.bin/nc/
+   $ NETCAT_VERSION="$(sed -nr '/^\s*\/\*\s*\$OpenBSD: netcat\.c,\s*v\s*([0-9]+(\.[0-9]+)*).* \$\s*\*\/$/ {s//\1/p;q}' netcat.c)"
+   $ git add --all
+   $ git commit -m "Imported Upstream version $NETCAT_VERSION" -m "From OpenBSD $OPENBSD_VERSION"
+   $ git tag --sign -m "Upstream version $NETCAT_VERSION" "upstream/$NETCAT_VERSION"
+
+ 4. Merge to master branch
+
+   $ git checkout master
+   $ git merge -m "Updated version $NETCAT_VERSION from 'upstream/$NETCAT_VERSION'" "upstream/$NETCAT_VERSION"
+   $ export QUILT_PATCHES=debian/patches
+   $ quilt push
+   $ quilt refresh --diffstat --no-timestamps --no-index -upab
+   ## […]
+   $ dch -v "$NETCAT_VERSION-1"
+
+ -- Guilhem Moulin <guilhem@debian.org>  Fri, 09 Jun 2017 16:41:04 +0200
