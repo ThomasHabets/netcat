@@ -8,7 +8,7 @@ Subject: connect timeout
 
 --- a/netcat.c
 +++ b/netcat.c
-@@ -87,6 +87,7 @@
+@@ -89,6 +89,7 @@
  
  #include <err.h>
  #include <errno.h>
@@ -16,7 +16,7 @@ Subject: connect timeout
  #include <limits.h>
  #include <netdb.h>
  #include <poll.h>
-@@ -122,6 +123,10 @@
+@@ -124,6 +125,10 @@
  # define TLS_MUSTSTAPLE	(1 << 5)
  #endif
  
@@ -27,7 +27,7 @@ Subject: connect timeout
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
-@@ -206,6 +211,9 @@ ssize_t drainbuf(int, unsigned char *, s
+@@ -208,6 +213,9 @@ ssize_t drainbuf(int, unsigned char *, s
  ssize_t fillbuf(int, unsigned char *, size_t *);
  # endif
  
@@ -37,7 +37,7 @@ Subject: connect timeout
  int
  main(int argc, char *argv[])
  {
-@@ -1020,11 +1028,14 @@ remote_connect(const char *host, const c
+@@ -1022,11 +1030,14 @@ remote_connect(const char *host, const c
  
  		set_common_sockopts(s, res->ai_family);
  
@@ -54,7 +54,7 @@ Subject: connect timeout
  
  		save_errno = errno;
  		close(s);
-@@ -1065,6 +1076,69 @@ timeout_connect(int s, const struct sock
+@@ -1067,6 +1078,69 @@ timeout_connect(int s, const struct sock
  	return (ret);
  }
  

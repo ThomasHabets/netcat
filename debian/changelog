@@ -2,6 +2,7 @@ netcat-openbsd (1.178-2) UNRELEASED; urgency=medium
 
   * debian/control: Bump Standards-Version to 4.0.0 (no changes necessary).
   * debian/rules: Avoid parsing dpkg-parsechangelog(1) output.
+  * Fix FTBFS on kFreeBSD.
 
  -- Guilhem Moulin <guilhem@debian.org>  Tue, 27 Jun 2017 12:01:20 +0200
 

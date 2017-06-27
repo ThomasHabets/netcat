@@ -8,7 +8,7 @@ Subject: udp scan timeout
 
 --- a/netcat.c
 +++ b/netcat.c
-@@ -127,6 +127,8 @@
+@@ -129,6 +129,8 @@
  #define CONNECTION_FAILED 1
  #define CONNECTION_TIMEOUT 2
  
@@ -17,7 +17,7 @@ Subject: udp scan timeout
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
-@@ -772,7 +774,7 @@ main(int argc, char *argv[])
+@@ -774,7 +776,7 @@ main(int argc, char *argv[])
  				continue;
  
  			ret = 0;
@@ -26,7 +26,7 @@ Subject: udp scan timeout
  				/* For UDP, make sure we are connected. */
  				if (uflag) {
  					if (udptest(s) == -1) {
-@@ -1691,15 +1693,20 @@ build_ports(char *p)
+@@ -1693,15 +1695,20 @@ build_ports(char *p)
  int
  udptest(int s)
  {

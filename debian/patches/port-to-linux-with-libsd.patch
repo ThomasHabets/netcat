@@ -3,11 +3,11 @@ Date: Mon, 13 Feb 2012 15:59:31 +0800
 Subject: port to linux with libsd
 
 ---
- Makefile |   15 ++++++++
+ Makefile |   15 +++++++-
  nc.1     |    4 --
- netcat.c |  106 ++++++++++++++++++++++++++++++++++++++++++++++-----------------
- socks.c  |   46 +++++++++++++--------------
- 4 files changed, 117 insertions(+), 54 deletions(-)
+ netcat.c |  118 +++++++++++++++++++++++++++++++++++++++++++++++----------------
+ socks.c  |   46 ++++++++++++------------
+ 4 files changed, 127 insertions(+), 56 deletions(-)
 
 --- a/Makefile
 +++ b/Makefile
@@ -61,11 +61,13 @@ Subject: port to linux with libsd
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <sys/uio.h>
-@@ -41,6 +43,47 @@
+@@ -41,6 +43,49 @@
  #include <netinet/tcp.h>
  #include <netinet/ip.h>
  #include <arpa/telnet.h>
-+#include <linux/in6.h>
++#ifdef __linux__
++# include <linux/in6.h>
++#endif
 +
 +#ifndef IPTOS_LOWDELAY
 +# define IPTOS_LOWDELAY 0x10
@@ -109,7 +111,7 @@ Subject: port to linux with libsd
  
  #include <err.h>
  #include <errno.h>
-@@ -55,6 +98,8 @@
+@@ -55,6 +100,8 @@
  #include <time.h>
  #include <unistd.h>
  #include <tls.h>
@@ -118,7 +120,7 @@ Subject: port to linux with libsd
  #include "atomicio.h"
  
  #define PORT_MAX	65535
-@@ -260,10 +305,14 @@ main(int argc, char *argv[])
+@@ -260,10 +307,14 @@ main(int argc, char *argv[])
  			uflag = 1;
  			break;
  		case 'V':
@@ -133,7 +135,7 @@ Subject: port to linux with libsd
  			break;
  		case 'v':
  			vflag = 1;
-@@ -301,7 +350,11 @@ main(int argc, char *argv[])
+@@ -301,7 +352,11 @@ main(int argc, char *argv[])
  			oflag = optarg;
  			break;
  		case 'S':
@@ -145,7 +147,7 @@ Subject: port to linux with libsd
  			break;
  		case 'T':
  			errstr = NULL;
-@@ -326,32 +379,23 @@ main(int argc, char *argv[])
+@@ -326,32 +381,23 @@ main(int argc, char *argv[])
  	argc -= optind;
  	argv += optind;
  
@@ -187,7 +189,7 @@ Subject: port to linux with libsd
  	} else if (argv[0] && !argv[1]) {
  		if  (!lflag)
  			usage(1);
-@@ -363,12 +407,6 @@ main(int argc, char *argv[])
+@@ -363,12 +409,6 @@ main(int argc, char *argv[])
  	} else
  		usage(1);
  
@@ -200,7 +202,7 @@ Subject: port to linux with libsd
  	if (!lflag && kflag)
  		errx(1, "must use -l with -k");
  	if (uflag && usetls)
-@@ -401,8 +439,8 @@ main(int argc, char *argv[])
+@@ -401,8 +441,8 @@ main(int argc, char *argv[])
  		} else {
  			strlcpy(unix_dg_tmp_socket_buf, "/tmp/nc.XXXXXXXXXX",
  			    UNIX_DG_TMP_SOCKET_SIZE);
@@ -211,7 +213,7 @@ Subject: port to linux with libsd
  			unix_dg_tmp_socket = unix_dg_tmp_socket_buf;
  		}
  	}
-@@ -880,8 +918,10 @@ remote_connect(const char *host, const c
+@@ -880,8 +920,10 @@ remote_connect(const char *host, const c
  		if (sflag || pflag) {
  			struct addrinfo ahints, *ares;
  
@@ -222,7 +224,7 @@ Subject: port to linux with libsd
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res->ai_family;
  			ahints.ai_socktype = uflag ? SOCK_DGRAM : SOCK_STREAM;
-@@ -973,9 +1013,15 @@ local_listen(char *host, char *port, str
+@@ -973,9 +1015,15 @@ local_listen(char *host, char *port, str
  		    res->ai_protocol)) < 0)
  			continue;
  
@@ -238,7 +240,7 @@ Subject: port to linux with libsd
  
  		set_common_sockopts(s, res->ai_family);
  
-@@ -1425,11 +1471,13 @@ set_common_sockopts(int s, int af)
+@@ -1425,11 +1473,13 @@ set_common_sockopts(int s, int af)
  {
  	int x = 1;
  
@@ -252,7 +254,33 @@ Subject: port to linux with libsd
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
-@@ -1507,6 +1555,7 @@ map_tos(char *s, int *val)
+@@ -1460,8 +1510,11 @@ set_common_sockopts(int s, int af)
+ 		    IP_TTL, &ttl, sizeof(ttl)))
+ 			err(1, "set IP TTL");
+ 
+-		else if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
++		else
++#if defined(IPV6_UNICAST_HOPS)
++			if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
+ 		    IPV6_UNICAST_HOPS, &ttl, sizeof(ttl)))
++#endif
+ 			err(1, "set IPv6 unicast hops");
+ 	}
+ 
+@@ -1470,8 +1523,11 @@ set_common_sockopts(int s, int af)
+ 		    IP_MINTTL, &minttl, sizeof(minttl)))
+ 			err(1, "set IP min TTL");
+ 
+-		else if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
++		else
++#if defined(IPV6_MINHOPCOUNT)
++			if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
+ 		    IPV6_MINHOPCOUNT, &minttl, sizeof(minttl)))
++#endif
+ 			err(1, "set IPv6 min hop count");
+ 	}
+ }
+@@ -1507,6 +1563,7 @@ map_tos(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -260,7 +288,7 @@ Subject: port to linux with libsd
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -1640,6 +1689,9 @@ report_connect(const struct sockaddr *sa
+@@ -1640,6 +1697,9 @@ report_connect(const struct sockaddr *sa
  void
  help(void)
  {
@@ -270,7 +298,7 @@ Subject: port to linux with libsd
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -1680,7 +1732,7 @@ help(void)
+@@ -1680,7 +1740,7 @@ help(void)
  	\t-x addr[:port]\tSpecify proxy address and port\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");

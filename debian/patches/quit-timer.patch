@@ -35,7 +35,7 @@ Subject: quit timer
  instead of sequentially within a range or in the order that the system
 --- a/netcat.c
 +++ b/netcat.c
-@@ -137,6 +137,7 @@ int	Nflag;					/* shutdown() network soc
+@@ -139,6 +139,7 @@ int	Nflag;					/* shutdown() network soc
  int	nflag;					/* Don't do name look up */
  char   *Pflag;					/* Proxy username */
  char   *pflag;					/* Localport flag */
@@ -43,7 +43,7 @@ Subject: quit timer
  int	rflag;					/* Random ports flag */
  char   *sflag;					/* Source Address */
  int	tflag;					/* Telnet Emulation */
-@@ -216,6 +217,8 @@ ssize_t fillbuf(int, unsigned char *, si
+@@ -218,6 +219,8 @@ ssize_t fillbuf(int, unsigned char *, si
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
  
@@ -52,7 +52,7 @@ Subject: quit timer
  int
  main(int argc, char *argv[])
  {
-@@ -244,9 +247,9 @@ main(int argc, char *argv[])
+@@ -246,9 +249,9 @@ main(int argc, char *argv[])
  
  	while ((ch = getopt(argc, argv,
  # if defined(TLS)
@@ -64,7 +64,7 @@ Subject: quit timer
  # endif
  		switch (ch) {
  		case '4':
-@@ -337,6 +340,13 @@ main(int argc, char *argv[])
+@@ -339,6 +342,13 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -78,7 +78,7 @@ Subject: quit timer
  # if defined(TLS)
  		case 'R':
  			tls_cachanged = 1;
-@@ -1251,15 +1261,27 @@ readwrite(int net_fd)
+@@ -1253,15 +1263,27 @@ readwrite(int net_fd)
  	while (1) {
  		/* both inputs are gone, buffers are empty, we are done */
  		if (pfd[POLL_STDIN].fd == -1 && pfd[POLL_NETIN].fd == -1 &&
@@ -112,7 +112,7 @@ Subject: quit timer
  
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
-@@ -1928,6 +1950,7 @@ help(void)
+@@ -1936,6 +1958,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -120,7 +120,7 @@ Subject: quit timer
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s source	Local source address\n\
-@@ -1951,9 +1974,18 @@ usage(int ret)
+@@ -1959,9 +1982,18 @@ usage(int ret)
  	fprintf(stderr,
  	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
  	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"

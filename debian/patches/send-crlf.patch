@@ -38,7 +38,7 @@ Subject: send crlf
  RCPT TO:\*(Ltuser2@host.example.com\*(Gt
 --- a/netcat.c
 +++ b/netcat.c
-@@ -161,6 +161,8 @@ int	tls_cachanged;				/* Using non-defau
+@@ -163,6 +163,8 @@ int	tls_cachanged;				/* Using non-defau
  int     TLSopt;					/* TLS options */
  char	*tls_expectname;			/* required name in peer cert */
  char	*tls_expecthash;			/* required hash of peer cert */
@@ -47,7 +47,7 @@ Subject: send crlf
  # endif
  
  int timeout = -1;
-@@ -207,7 +209,7 @@ ssize_t fillbuf(int, unsigned char *, si
+@@ -209,7 +211,7 @@ ssize_t fillbuf(int, unsigned char *, si
  void	tls_setup_client(struct tls *, int, char *);
  struct tls *tls_setup_server(struct tls *, int, char *);
  # else
@@ -56,7 +56,7 @@ Subject: send crlf
  ssize_t fillbuf(int, unsigned char *, size_t *);
  # endif
  
-@@ -244,7 +246,7 @@ main(int argc, char *argv[])
+@@ -246,7 +248,7 @@ main(int argc, char *argv[])
  # if defined(TLS)
  	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
  # else
@@ -65,7 +65,7 @@ Subject: send crlf
  # endif
  		switch (ch) {
  		case '4':
-@@ -273,6 +275,10 @@ main(int argc, char *argv[])
+@@ -275,6 +277,10 @@ main(int argc, char *argv[])
  		case 'c':
  			usetls = 1;
  			break;
@@ -76,7 +76,7 @@ Subject: send crlf
  # endif
  		case 'd':
  			dflag = 1;
-@@ -1255,12 +1261,6 @@ readwrite(int net_fd)
+@@ -1257,12 +1263,6 @@ readwrite(int net_fd)
  		    stdinbufpos == 0 && netinbufpos == 0)
  			return;
  
@@ -89,7 +89,7 @@ Subject: send crlf
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
  
-@@ -1340,7 +1340,7 @@ readwrite(int net_fd)
+@@ -1342,7 +1342,7 @@ readwrite(int net_fd)
  				pfd[POLL_NETOUT].events = POLLOUT;
  			else
  # else
@@ -98,7 +98,7 @@ Subject: send crlf
  # endif
  			if (ret == -1)
  				pfd[POLL_NETOUT].fd = -1;
-@@ -1393,7 +1393,7 @@ readwrite(int net_fd)
+@@ -1395,7 +1395,7 @@ readwrite(int net_fd)
  				pfd[POLL_STDOUT].events = POLLOUT;
  			else
  # else
@@ -107,7 +107,7 @@ Subject: send crlf
  # endif
  			if (ret == -1)
  				pfd[POLL_STDOUT].fd = -1;
-@@ -1419,31 +1419,40 @@ readwrite(int net_fd)
+@@ -1421,31 +1421,40 @@ readwrite(int net_fd)
  }
  
  ssize_t
@@ -168,7 +168,7 @@ Subject: send crlf
  	/* adjust buffer */
  	adjust = *bufpos - n;
  	if (adjust > 0)
-@@ -1903,6 +1912,7 @@ help(void)
+@@ -1911,6 +1920,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -176,7 +176,7 @@ Subject: send crlf
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
  	\t-F		Pass socket fd\n\
-@@ -1939,7 +1949,7 @@ void
+@@ -1947,7 +1957,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,
