@@ -3,11 +3,11 @@ Date: Mon, 13 Feb 2012 15:59:31 +0800
 Subject: port to linux with libsd
 
 ---
- Makefile |   15 +++++++-
- nc.1     |    4 --
- netcat.c |  118 +++++++++++++++++++++++++++++++++++++++++++++++----------------
- socks.c  |   46 ++++++++++++------------
- 4 files changed, 127 insertions(+), 56 deletions(-)
+ Makefile |   15 ++++++-
+ nc.1     |    4 -
+ netcat.c |  128 +++++++++++++++++++++++++++++++++++++++++++++++++--------------
+ socks.c  |   46 +++++++++++-----------
+ 4 files changed, 139 insertions(+), 54 deletions(-)
 
 --- a/Makefile
 +++ b/Makefile
@@ -254,33 +254,57 @@ Subject: port to linux with libsd
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
-@@ -1460,8 +1510,11 @@ set_common_sockopts(int s, int af)
+@@ -1440,9 +1490,14 @@ set_common_sockopts(int s, int af)
+ 		    IP_TOS, &Tflag, sizeof(Tflag)) == -1)
+ 			err(1, "set IP ToS");
+ 
++#if defined(IPV6_TCLASS)
+ 		else if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
+ 		    IPV6_TCLASS, &Tflag, sizeof(Tflag)) == -1)
+ 			err(1, "set IPv6 traffic class");
++#else
++		else if (af == AF_INET6)
++			errx(1, "can't set IPv6 traffic class (unavailable)");
++#endif
+ 	}
+ 	if (Iflag) {
+ 		if (setsockopt(s, SOL_SOCKET, SO_RCVBUF,
+@@ -1460,19 +1515,34 @@ set_common_sockopts(int s, int af)
  		    IP_TTL, &ttl, sizeof(ttl)))
  			err(1, "set IP TTL");
  
--		else if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
-+		else
 +#if defined(IPV6_UNICAST_HOPS)
-+			if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
+ 		else if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
  		    IPV6_UNICAST_HOPS, &ttl, sizeof(ttl)))
-+#endif
  			err(1, "set IPv6 unicast hops");
++#else
++		else if (af == AF_INET6)
++			errx(1, "can't set IPv6 unicast hops (unavailable)");
++#endif
  	}
  
-@@ -1470,8 +1523,11 @@ set_common_sockopts(int s, int af)
+ 	if (minttl != -1) {
++#if defined(IP_MINTTL)
+ 		if (af == AF_INET && setsockopt(s, IPPROTO_IP,
  		    IP_MINTTL, &minttl, sizeof(minttl)))
  			err(1, "set IP min TTL");
- 
--		else if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
-+		else
-+#if defined(IPV6_MINHOPCOUNT)
-+			if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
- 		    IPV6_MINHOPCOUNT, &minttl, sizeof(minttl)))
++#else
++		if (af == AF_INET)
++			errx(1, "can't set IP min TTL (unavailable)");
 +#endif
+ 
++#if defined(IPV6_MINHOPCOUNT)
+ 		else if (af == AF_INET6 && setsockopt(s, IPPROTO_IPV6,
+ 		    IPV6_MINHOPCOUNT, &minttl, sizeof(minttl)))
  			err(1, "set IPv6 min hop count");
++#else
++		else if (af == AF_INET6)
++			errx(1, "can't set IPv6 min hop count (unavailable)");
++#endif
  	}
  }
-@@ -1507,6 +1563,7 @@ map_tos(char *s, int *val)
+ 
+@@ -1507,6 +1577,7 @@ map_tos(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -288,7 +312,7 @@ Subject: port to linux with libsd
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -1640,6 +1697,9 @@ report_connect(const struct sockaddr *sa
+@@ -1640,6 +1711,9 @@ report_connect(const struct sockaddr *sa
  void
  help(void)
  {
@@ -298,7 +322,7 @@ Subject: port to linux with libsd
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -1680,7 +1740,7 @@ help(void)
+@@ -1680,7 +1754,7 @@ help(void)
  	\t-x addr[:port]\tSpecify proxy address and port\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");

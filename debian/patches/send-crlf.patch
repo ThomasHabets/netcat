@@ -168,7 +168,7 @@ Subject: send crlf
  	/* adjust buffer */
  	adjust = *bufpos - n;
  	if (adjust > 0)
-@@ -1911,6 +1920,7 @@ help(void)
+@@ -1925,6 +1934,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -176,7 +176,7 @@ Subject: send crlf
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
  	\t-F		Pass socket fd\n\
-@@ -1947,7 +1957,7 @@ void
+@@ -1961,7 +1971,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,

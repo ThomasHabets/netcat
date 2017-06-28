@@ -372,7 +372,7 @@ Subject: misc failures and features
  # if defined(TCP_MD5SIG) && defined(TCP_MD5SIG_MAXKEYLEN)
  	if (Sflag) {
  		struct tcp_md5sig sig;
-@@ -2042,6 +2078,7 @@ help(void)
+@@ -2056,6 +2092,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\

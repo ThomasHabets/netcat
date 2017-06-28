@@ -112,7 +112,7 @@ Subject: quit timer
  
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
-@@ -1936,6 +1958,7 @@ help(void)
+@@ -1950,6 +1972,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -120,7 +120,7 @@ Subject: quit timer
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s source	Local source address\n\
-@@ -1959,9 +1982,18 @@ usage(int ret)
+@@ -1973,9 +1996,18 @@ usage(int ret)
  	fprintf(stderr,
  	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
  	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
