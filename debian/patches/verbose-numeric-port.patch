@@ -22,10 +22,10 @@ Subject: verbose numeric port
  				err(1, NULL);
 +
 +			char* local;
-+			if (family == AF_INET6)
++			if (family == AF_INET)
 +				local = "0.0.0.0";
-+			else if (family == AF_INET)
-+				local = ":::";
++			else if (family == AF_INET6)
++				local = "::";
 +			else
 +				local = "unknown";
 +			fprintf(stderr, "Listening on [%s] (family %d, port %d)\n",
