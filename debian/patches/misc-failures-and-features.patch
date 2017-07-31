@@ -273,7 +273,7 @@ Subject: misc failures and features
  			err(1, NULL);
  
 @@ -683,7 +702,8 @@ main(int argc, char *argv[])
- 			local = ":::";
+ 			local = "::";
  		else
  			local = "0.0.0.0";
 -		fprintf(stderr, "Listening on [%s] (family %d, port %d)\n",
