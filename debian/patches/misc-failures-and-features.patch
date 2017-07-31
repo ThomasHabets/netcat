@@ -282,7 +282,7 @@ Subject: misc failures and features
  			host ?: local,
  			family,
  			*uport);
-@@ -898,6 +918,8 @@ unix_bind(char *path, int flags)
+@@ -897,6 +917,8 @@ unix_bind(char *path, int flags)
  	    0)) < 0)
  		return (-1);
  
@@ -291,7 +291,7 @@ Subject: misc failures and features
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
  	s_un.sun_family = AF_UNIX;
  
-@@ -1015,8 +1037,10 @@ unix_connect(char *path)
+@@ -1014,8 +1036,10 @@ unix_connect(char *path)
  		if ((s = unix_bind(unix_dg_tmp_socket, SOCK_CLOEXEC)) < 0)
  			return (-1);
  	} else {
@@ -303,7 +303,7 @@ Subject: misc failures and features
  	}
  
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
-@@ -1026,10 +1050,12 @@ unix_connect(char *path)
+@@ -1025,10 +1049,12 @@ unix_connect(char *path)
  	    sizeof(s_un.sun_path)) {
  		close(s);
  		errno = ENAMETOOLONG;
@@ -316,7 +316,7 @@ Subject: misc failures and features
  		close(s);
  		errno = save_errno;
  		return (-1);
-@@ -1718,25 +1744,26 @@ strtoport(char *portstr, int udp)
+@@ -1717,25 +1743,26 @@ strtoport(char *portstr, int udp)
   * that we should try to connect to.
   */
  void
@@ -347,7 +347,7 @@ Subject: misc failures and features
  		if (lo > hi) {
  			cp = hi;
  			hi = lo;
-@@ -1764,7 +1791,7 @@ build_ports(char *p)
+@@ -1763,7 +1790,7 @@ build_ports(char *p)
  	} else {
  		char *tmp;
  
@@ -356,7 +356,7 @@ Subject: misc failures and features
  		if (asprintf(&tmp, "%d", hi) != -1)
  			portlist[0] = tmp;
  		else
-@@ -1802,6 +1829,15 @@ set_common_sockopts(int s, const struct
+@@ -1801,6 +1828,15 @@ set_common_sockopts(int s, const struct
  	int x = 1;
  	int af = sa->sa_family;
  
@@ -372,7 +372,7 @@ Subject: misc failures and features
  # if defined(TCP_MD5SIG) && defined(TCP_MD5SIG_MAXKEYLEN)
  	if (Sflag) {
  		struct tcp_md5sig sig;
-@@ -2056,6 +2092,7 @@ help(void)
+@@ -2055,6 +2091,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\

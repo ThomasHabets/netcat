@@ -119,7 +119,7 @@ Subject: dccp support
  		if (lflag)
  			errx(1, "no proxy support for listen");
  
-@@ -798,19 +828,20 @@ main(int argc, char *argv[])
+@@ -797,19 +827,20 @@ main(int argc, char *argv[])
  					}
  				}
  
@@ -142,7 +142,7 @@ Subject: dccp support
  				    sv ? sv->s_name : "*");
  			}
  			if (Fflag)
-@@ -1017,6 +1048,24 @@ unix_listen(char *path)
+@@ -1016,6 +1047,24 @@ unix_listen(char *path)
  	return (s);
  }
  
@@ -167,7 +167,7 @@ Subject: dccp support
  /*
   * remote_connect()
   * Returns a socket connected to a remote host. Properly binds to a local
-@@ -1047,8 +1096,21 @@ remote_connect(const char *host, const c
+@@ -1046,8 +1095,21 @@ remote_connect(const char *host, const c
  # endif
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res->ai_family;
@@ -191,7 +191,7 @@ Subject: dccp support
  			ahints.ai_flags = AI_PASSIVE;
  			if ((error = getaddrinfo(sflag, pflag, &ahints, &ares)))
  				errx(1, "getaddrinfo: %s", gai_strerror(error));
-@@ -1060,15 +1122,16 @@ remote_connect(const char *host, const c
+@@ -1059,15 +1121,16 @@ remote_connect(const char *host, const c
  		}
  
  		set_common_sockopts(s, res->ai_family);
@@ -211,7 +211,7 @@ Subject: dccp support
  
  		save_errno = errno;
  		close(s);
-@@ -1654,7 +1717,8 @@ build_ports(char *p)
+@@ -1653,7 +1716,8 @@ build_ports(char *p)
  	int hi, lo, cp;
  	int x = 0;
  
@@ -221,7 +221,7 @@ Subject: dccp support
  	if (sv) {
  		if (asprintf(&portlist[0], "%d", ntohs(sv->s_port)) < 0)
  			err(1, "asprintf");
-@@ -2005,6 +2069,7 @@ help(void)
+@@ -2004,6 +2068,7 @@ help(void)
  	\t-w timeout	Timeout for connects and final net reads\n\
  	\t-X proto	Proxy protocol: \"4\", \"5\" (SOCKS) or \"connect\"\n\
  	\t-x addr[:port]\tSpecify proxy address and port\n\
@@ -229,7 +229,7 @@ Subject: dccp support
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
  	exit(0);
-@@ -2014,7 +2079,7 @@ void
+@@ -2013,7 +2078,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,

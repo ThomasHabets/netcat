@@ -3,8 +3,8 @@ Date: Mon, 13 Feb 2012 15:38:15 +0800
 Subject: verbose numeric port
 
 ---
- netcat.c |   19 ++++++++++++++++---
- 1 file changed, 16 insertions(+), 3 deletions(-)
+ netcat.c |   22 +++++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
 
 --- a/netcat.c
 +++ b/netcat.c
@@ -35,9 +35,11 @@ Subject: verbose numeric port
  			/*
  			 * For UDP and -k, don't connect the socket, let it
  			 * receive datagrams from multiple socket pairs.
-@@ -671,14 +684,14 @@ main(int argc, char *argv[])
+@@ -669,21 +682,20 @@ main(int argc, char *argv[])
+ 			else if (uflag && !kflag) {
+ 				int rv, plen;
  				char buf[16384];
- 				struct sockaddr_storage z;
+-				struct sockaddr_storage z;
  
 -				len = sizeof(z);
 +				len = sizeof(cliaddr);
@@ -53,3 +55,9 @@ Subject: verbose numeric port
  				if (rv < 0)
  					err(1, "connect");
  
+ 				if (vflag)
+-					report_connect((struct sockaddr *)&z, len, NULL);
++					report_connect((struct sockaddr *)&cliaddr, len, NULL);
+ 
+ # if defined(TLS)
+ 				readwrite(s, NULL);

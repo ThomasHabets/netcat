@@ -49,7 +49,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  			Sflag = 1;
  # else
  			errx(1, "no TCP MD5 signature support available");
-@@ -1120,7 +1129,7 @@ remote_connect(const char *host, const c
+@@ -1119,7 +1128,7 @@ remote_connect(const char *host, const c
  			freeaddrinfo(ares);
  		}
  
@@ -58,7 +58,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  		char *proto = proto_name(uflag, dccpflag);
  
  		if ((error = connect_with_timeout(s, res->ai_addr, res->ai_addrlen, timeout)) == CONNECTION_SUCCESS)
-@@ -1274,7 +1283,7 @@ local_listen(char *host, char *port, str
+@@ -1273,7 +1282,7 @@ local_listen(char *host, char *port, str
  			err(1, NULL);
  # endif
  
@@ -67,7 +67,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  
  		if (bind(s, (struct sockaddr *)res->ai_addr,
  		    res->ai_addrlen) == 0)
-@@ -1788,14 +1797,22 @@ udptest(int s)
+@@ -1787,14 +1796,22 @@ udptest(int s)
  }
  
  void

@@ -54,7 +54,7 @@ Subject: serialized handling multiple clients
  			/*
  			 * For UDP and -k, don't connect the socket, let it
  			 * receive datagrams from multiple socket pairs.
-@@ -760,15 +758,16 @@ main(int argc, char *argv[])
+@@ -759,15 +757,16 @@ main(int argc, char *argv[])
  # endif
  				close(connfd);
  			}

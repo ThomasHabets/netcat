@@ -1,6 +1,8 @@
 netcat-openbsd (1.178-3) UNRELEASED; urgency=medium
 
   * Fix FTBFS on hurd-i386.
+  * Fix verbose mode with UDP (-uv).  Thanks to Akos Pasztory for the report
+    and patch.  Closes: #870240.
 
  -- Guilhem Moulin <guilhem@debian.org>  Wed, 28 Jun 2017 11:18:17 +0200
 
