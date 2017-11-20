@@ -2,7 +2,7 @@ Importing a new upstream release
 
  1. Download the OpenBSD tarball and verify its integrity
 
-   $ OPENBSD_VERSION=5.9
+   $ OPENBSD_VERSION=6.2
    $ DESTDIR="$XDG_RUNTIME_DIR"
    $ rsync -v rsync://ftp.eu.openbsd.org/OpenBSD/$OPENBSD_VERSION/{src.tar.gz,SHA256.sig} "$DESTDIR"
  
@@ -18,7 +18,7 @@ Importing a new upstream release
    $ git checkout upstream
    $ git rm -r .
    $ ls # ensure there are no left-overs
-   $ tar --extract --exclude CVS --exclude obj --strip-components=3 -vzf "$DESTDIR/src.tar.gz" ./usr.bin/nc/
+   $ tar --extract --exclude CVS --exclude obj --strip-components=2 -vzf "$DESTDIR/src.tar.gz" usr.bin/nc/
    $ NETCAT_VERSION="$(sed -nr '/^\s*\/\*\s*\$OpenBSD: netcat\.c,\s*v\s*([0-9]+(\.[0-9]+)*).* \$\s*\*\/$/ {s//\1/p;q}' netcat.c)"
    $ git add --all
    $ git commit -m "Imported Upstream version $NETCAT_VERSION" -m "From OpenBSD $OPENBSD_VERSION"
