@@ -1,6 +1,7 @@
 netcat-openbsd (1.187-1) UNRELEASED; urgency=low
 
   * New upstream release (from OpenBSD 6.2)
+  * debian/control: Bump Standards-Version to 4.1.1 (no changes necessary).
 
  -- Guilhem Moulin <guilhem@debian.org>  Thu, 23 Nov 2017 04:01:10 +0100
 
