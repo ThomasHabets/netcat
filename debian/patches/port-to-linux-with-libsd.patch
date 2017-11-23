@@ -5,9 +5,9 @@ Subject: port to linux with libsd
 ---
  Makefile |   15 ++++++-
  nc.1     |    4 -
- netcat.c |  128 +++++++++++++++++++++++++++++++++++++++++++++++++--------------
+ netcat.c |  131 ++++++++++++++++++++++++++++++++++++++++++++++++---------------
  socks.c  |   46 +++++++++++-----------
- 4 files changed, 139 insertions(+), 54 deletions(-)
+ 4 files changed, 139 insertions(+), 57 deletions(-)
 
 --- a/Makefile
 +++ b/Makefile
@@ -32,7 +32,7 @@ Subject: port to linux with libsd
 +	rm -f $(OBJS) nc
 --- a/nc.1
 +++ b/nc.1
-@@ -202,9 +202,6 @@ Proxy authentication is only supported f
+@@ -204,9 +204,6 @@ Proxy authentication is only supported f
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -42,7 +42,7 @@ Subject: port to linux with libsd
  .It Fl R Ar CAfile
  Specifies the filename from which the root CA bundle for certificate
  verification is loaded, in PEM format.
-@@ -249,6 +246,7 @@ For IPv4 TOS value
+@@ -253,6 +250,7 @@ For IPv4 TOS value
  may be one of
  .Ar critical ,
  .Ar inetcontrol ,
@@ -113,14 +113,14 @@ Subject: port to linux with libsd
  #include <errno.h>
 @@ -55,6 +100,8 @@
  #include <time.h>
- #include <unistd.h>
  #include <tls.h>
+ #include <unistd.h>
 +#include <bsd/stdlib.h>
 +#include <bsd/string.h>
+ 
  #include "atomicio.h"
  
- #define PORT_MAX	65535
-@@ -260,10 +307,14 @@ main(int argc, char *argv[])
+@@ -267,10 +314,14 @@ main(int argc, char *argv[])
  			uflag = 1;
  			break;
  		case 'V':
@@ -135,7 +135,7 @@ Subject: port to linux with libsd
  			break;
  		case 'v':
  			vflag = 1;
-@@ -301,7 +352,11 @@ main(int argc, char *argv[])
+@@ -319,7 +370,11 @@ main(int argc, char *argv[])
  			oflag = optarg;
  			break;
  		case 'S':
@@ -147,7 +147,7 @@ Subject: port to linux with libsd
  			break;
  		case 'T':
  			errstr = NULL;
-@@ -326,32 +381,23 @@ main(int argc, char *argv[])
+@@ -344,35 +399,23 @@ main(int argc, char *argv[])
  	argc -= optind;
  	argv += optind;
  
@@ -159,11 +159,14 @@ Subject: port to linux with libsd
 -	if (family == AF_UNIX) {
 -		if (pledge("stdio rpath wpath cpath tmppath unix", NULL) == -1)
 -			err(1, "pledge");
--	} else if (Fflag) {
--		if (Pflag) {
--			if (pledge("stdio inet dns sendfd tty", NULL) == -1)
--				err(1, "pledge");
--		} else if (pledge("stdio inet dns sendfd", NULL) == -1)
+-	} else if (Fflag && Pflag) {
+-		if (pledge("stdio inet dns sendfd tty", NULL) == -1)
+-			err(1, "pledge");
+-	} else if (Fflag) { 
+-		if (pledge("stdio inet dns sendfd", NULL) == -1)
+-			err(1, "pledge");
+-	} else if (Pflag && usetls) {
+-		if (pledge("stdio rpath inet dns tty", NULL) == -1)
 -			err(1, "pledge");
 -	} else if (Pflag) {
 -		if (pledge("stdio inet dns tty", NULL) == -1)
@@ -187,9 +190,9 @@ Subject: port to linux with libsd
 +		if (pflag)
 +			uport=pflag;
  	} else if (argv[0] && !argv[1]) {
- 		if  (!lflag)
+ 		if (!lflag)
  			usage(1);
-@@ -363,12 +409,6 @@ main(int argc, char *argv[])
+@@ -384,12 +427,6 @@ main(int argc, char *argv[])
  	} else
  		usage(1);
  
@@ -202,7 +205,7 @@ Subject: port to linux with libsd
  	if (!lflag && kflag)
  		errx(1, "must use -l with -k");
  	if (uflag && usetls)
-@@ -401,8 +441,8 @@ main(int argc, char *argv[])
+@@ -426,8 +463,8 @@ main(int argc, char *argv[])
  		} else {
  			strlcpy(unix_dg_tmp_socket_buf, "/tmp/nc.XXXXXXXXXX",
  			    UNIX_DG_TMP_SOCKET_SIZE);
@@ -213,7 +216,7 @@ Subject: port to linux with libsd
  			unix_dg_tmp_socket = unix_dg_tmp_socket_buf;
  		}
  	}
-@@ -880,8 +920,10 @@ remote_connect(const char *host, const c
+@@ -907,8 +944,10 @@ remote_connect(const char *host, const c
  		if (sflag || pflag) {
  			struct addrinfo ahints, *ares;
  
@@ -224,7 +227,7 @@ Subject: port to linux with libsd
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res->ai_family;
  			ahints.ai_socktype = uflag ? SOCK_DGRAM : SOCK_STREAM;
-@@ -973,9 +1015,15 @@ local_listen(char *host, char *port, str
+@@ -1000,9 +1039,15 @@ local_listen(char *host, char *port, str
  		    res->ai_protocol)) < 0)
  			continue;
  
@@ -240,7 +243,7 @@ Subject: port to linux with libsd
  
  		set_common_sockopts(s, res->ai_family);
  
-@@ -1425,11 +1473,13 @@ set_common_sockopts(int s, int af)
+@@ -1458,11 +1503,13 @@ set_common_sockopts(int s, int af)
  {
  	int x = 1;
  
@@ -254,7 +257,7 @@ Subject: port to linux with libsd
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
-@@ -1440,9 +1490,14 @@ set_common_sockopts(int s, int af)
+@@ -1473,9 +1520,14 @@ set_common_sockopts(int s, int af)
  		    IP_TOS, &Tflag, sizeof(Tflag)) == -1)
  			err(1, "set IP ToS");
  
@@ -269,7 +272,7 @@ Subject: port to linux with libsd
  	}
  	if (Iflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_RCVBUF,
-@@ -1460,19 +1515,34 @@ set_common_sockopts(int s, int af)
+@@ -1493,19 +1545,34 @@ set_common_sockopts(int s, int af)
  		    IP_TTL, &ttl, sizeof(ttl)))
  			err(1, "set IP TTL");
  
@@ -304,7 +307,7 @@ Subject: port to linux with libsd
  	}
  }
  
-@@ -1507,6 +1577,7 @@ map_tos(char *s, int *val)
+@@ -1540,6 +1607,7 @@ map_tos(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -312,7 +315,7 @@ Subject: port to linux with libsd
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -1640,6 +1711,9 @@ report_connect(const struct sockaddr *sa
+@@ -1688,6 +1756,9 @@ report_connect(const struct sockaddr *sa
  void
  help(void)
  {
@@ -322,8 +325,8 @@ Subject: port to linux with libsd
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -1680,7 +1754,7 @@ help(void)
- 	\t-x addr[:port]\tSpecify proxy address and port\n\
+@@ -1730,7 +1801,7 @@ help(void)
+ 	\t-Z		Peer certificate file\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
 -	exit(1);

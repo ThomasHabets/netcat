@@ -16,8 +16,8 @@ Subject: connect timeout
  #include <limits.h>
  #include <netdb.h>
  #include <poll.h>
-@@ -124,6 +125,10 @@
- # define TLS_MUSTSTAPLE	(1 << 5)
+@@ -126,6 +127,10 @@
+ # define TLS_COMPAT	(1 << 6)
  #endif
  
 +#define CONNECTION_SUCCESS 0
@@ -27,7 +27,7 @@ Subject: connect timeout
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
  int	Fflag;					/* fdpass sock to stdout */
-@@ -208,6 +213,9 @@ ssize_t drainbuf(int, unsigned char *, s
+@@ -214,6 +219,9 @@ ssize_t drainbuf(int, unsigned char *, s
  ssize_t fillbuf(int, unsigned char *, size_t *);
  # endif
  
@@ -37,7 +37,7 @@ Subject: connect timeout
  int
  main(int argc, char *argv[])
  {
-@@ -1022,11 +1030,14 @@ remote_connect(const char *host, const c
+@@ -1048,11 +1056,14 @@ remote_connect(const char *host, const c
  
  		set_common_sockopts(s, res->ai_family);
  
@@ -54,8 +54,8 @@ Subject: connect timeout
  
  		save_errno = errno;
  		close(s);
-@@ -1067,6 +1078,69 @@ timeout_connect(int s, const struct sock
- 	return (ret);
+@@ -1093,6 +1104,69 @@ timeout_connect(int s, const struct sock
+ 	return ret;
  }
  
 +static int connect_with_timeout(int fd, const struct sockaddr *sa,

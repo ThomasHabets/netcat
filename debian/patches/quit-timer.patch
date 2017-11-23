@@ -17,7 +17,7 @@ Subject: quit timer
  .Op Fl s Ar source
  .Op Fl T Ar keyword
  .Op Fl V Ar rtable
-@@ -173,6 +174,15 @@ Proxy authentication is only supported f
+@@ -175,6 +176,15 @@ Proxy authentication is only supported f
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -35,7 +35,7 @@ Subject: quit timer
  instead of sequentially within a range or in the order that the system
 --- a/netcat.c
 +++ b/netcat.c
-@@ -139,6 +139,7 @@ int	Nflag;					/* shutdown() network soc
+@@ -141,6 +141,7 @@ int	Nflag;					/* shutdown() network soc
  int	nflag;					/* Don't do name look up */
  char   *Pflag;					/* Proxy username */
  char   *pflag;					/* Localport flag */
@@ -43,7 +43,7 @@ Subject: quit timer
  int	rflag;					/* Random ports flag */
  char   *sflag;					/* Source Address */
  int	tflag;					/* Telnet Emulation */
-@@ -218,6 +219,8 @@ ssize_t fillbuf(int, unsigned char *, si
+@@ -224,6 +225,8 @@ ssize_t fillbuf(int, unsigned char *, si
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
  
@@ -52,19 +52,19 @@ Subject: quit timer
  int
  main(int argc, char *argv[])
  {
-@@ -246,9 +249,9 @@ main(int argc, char *argv[])
+@@ -252,9 +255,9 @@ main(int argc, char *argv[])
  
  	while ((ch = getopt(argc, argv,
  # if defined(TLS)
--	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
-+	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:q:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
+-	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:R:rSs:T:tUuV:vW:w:X:x:Z:z"))
++	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:q:R:rSs:T:tUuV:vW:w:X:x:Z:z"))
  # else
-- 	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
-+	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vw:X:x:z")) != -1) {
+- 	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vW:w:X:x:z"))
++	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vW:w:X:x:z"))
  # endif
+ 	    != -1) {
  		switch (ch) {
- 		case '4':
-@@ -339,6 +342,13 @@ main(int argc, char *argv[])
+@@ -346,6 +349,13 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -78,7 +78,7 @@ Subject: quit timer
  # if defined(TLS)
  		case 'R':
  			tls_cachanged = 1;
-@@ -1253,15 +1263,27 @@ readwrite(int net_fd)
+@@ -1279,15 +1289,27 @@ readwrite(int net_fd)
  	while (1) {
  		/* both inputs are gone, buffers are empty, we are done */
  		if (pfd[POLL_STDIN].fd == -1 && pfd[POLL_NETIN].fd == -1 &&
@@ -112,7 +112,7 @@ Subject: quit timer
  
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
-@@ -1950,6 +1972,7 @@ help(void)
+@@ -1997,6 +2019,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -120,14 +120,15 @@ Subject: quit timer
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s source	Local source address\n\
-@@ -1973,9 +1996,18 @@ usage(int ret)
+@@ -2021,10 +2044,19 @@ usage(int ret)
  	fprintf(stderr,
  	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
  	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
--	    "\t  [-s source] [-T keyword] [-V rtable] [-w timeout] "
-+	    "\t  [-q seconds] [-s source] [-T keyword] [-V rtable] [-w timeout] "
- 	    "[-X proxy_protocol]\n"
- 	    "\t  [-x proxy_address[:port]] [destination] [port]\n");
+-	    "\t  [-s source] [-T keyword] [-V rtable] [-W recvlimit] "
++	    "\t  [-q seconds] [-s source] [-T keyword] [-V rtable] [-W recvlimit] "
+ 	    "[-w timeout]\n"
+ 	    "\t  [-X proxy_protocol] [-x proxy_address[:port]] "
+ 	    "\t  [destination] [port]\n");
  	if (ret)
  		exit(1);
  }

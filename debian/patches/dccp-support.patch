@@ -4,8 +4,8 @@ Subject: dccp support
 
 ---
  nc.1     |    4 ++
- netcat.c |   93 +++++++++++++++++++++++++++++++++++++++++++++++++++++----------
- 2 files changed, 82 insertions(+), 15 deletions(-)
+ netcat.c |   91 ++++++++++++++++++++++++++++++++++++++++++++++++++++++---------
+ 2 files changed, 81 insertions(+), 14 deletions(-)
 
 --- a/nc.1
 +++ b/nc.1
@@ -18,7 +18,7 @@ Subject: dccp support
  .Op Fl I Ar length
  .Op Fl i Ar interval
  .Op Fl M Ar ttl
-@@ -286,6 +286,8 @@ for SOCKS, 3128 for HTTPS).
+@@ -292,6 +292,8 @@ for SOCKS, 3128 for HTTPS).
  An IPv6 address can be specified unambiguously by enclosing
  .Ar proxy_address
  in square brackets.
@@ -29,7 +29,7 @@ Subject: dccp support
  .Nm
 --- a/netcat.c
 +++ b/netcat.c
-@@ -147,6 +147,7 @@ int	rflag;					/* Random ports flag */
+@@ -149,6 +149,7 @@ int	rflag;					/* Random ports flag */
  char   *sflag;					/* Source Address */
  int	tflag;					/* Telnet Emulation */
  int	uflag;					/* UDP - Default to TCP */
@@ -37,7 +37,7 @@ Subject: dccp support
  int	vflag;					/* Verbosity */
  int	xflag;					/* Socks proxy */
  int	zflag;					/* Port Scan Flag */
-@@ -219,6 +220,7 @@ ssize_t drainbuf(int, unsigned char *, s
+@@ -225,6 +226,7 @@ ssize_t drainbuf(int, unsigned char *, s
  ssize_t fillbuf(int, unsigned char *, size_t *);
  # endif
  
@@ -45,19 +45,16 @@ Subject: dccp support
  static int connect_with_timeout(int fd, const struct sockaddr *sa,
          socklen_t salen, int ctimeout);
  
-@@ -252,9 +254,9 @@ main(int argc, char *argv[])
- 
- 	while ((ch = getopt(argc, argv,
+@@ -260,7 +262,7 @@ main(int argc, char *argv[])
  # if defined(TLS)
--	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:q:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
-+	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:q:R:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
+ 	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:q:R:rSs:T:tUuV:vW:w:X:x:Z:z"))
  # else
--	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vw:X:x:z")) != -1) {
-+	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vw:X:x:Zz")) != -1) {
+-	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vW:w:X:x:z"))
++	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vW:w:X:x:Zz"))
  # endif
+ 	    != -1) {
  		switch (ch) {
- 		case '4':
-@@ -370,6 +372,13 @@ main(int argc, char *argv[])
+@@ -377,6 +379,13 @@ main(int argc, char *argv[])
  		case 'u':
  			uflag = 1;
  			break;
@@ -71,7 +68,7 @@ Subject: dccp support
  		case 'V':
  # if defined(RT_TABLEID_MAX)
  			rtableid = (int)strtonum(optarg, 0,
-@@ -461,6 +470,12 @@ main(int argc, char *argv[])
+@@ -481,6 +490,12 @@ main(int argc, char *argv[])
  
  	/* Cruft to make sure options are clean, and used properly. */
  	if (argv[0] && !argv[1] && family == AF_UNIX) {
@@ -84,7 +81,7 @@ Subject: dccp support
  		host = argv[0];
  		uport = NULL;
  	} else if (!argv[0] && lflag) {
-@@ -527,8 +542,20 @@ main(int argc, char *argv[])
+@@ -551,8 +566,20 @@ main(int argc, char *argv[])
  	if (family != AF_UNIX) {
  		memset(&hints, 0, sizeof(struct addrinfo));
  		hints.ai_family = family;
@@ -107,7 +104,7 @@ Subject: dccp support
  		if (nflag)
  			hints.ai_flags |= AI_NUMERICHOST;
  	}
-@@ -536,7 +563,10 @@ main(int argc, char *argv[])
+@@ -560,7 +587,10 @@ main(int argc, char *argv[])
  	if (xflag) {
  		if (uflag)
  			errx(1, "no proxy support for UDP mode");
@@ -119,7 +116,7 @@ Subject: dccp support
  		if (lflag)
  			errx(1, "no proxy support for listen");
  
-@@ -797,19 +827,20 @@ main(int argc, char *argv[])
+@@ -817,19 +847,20 @@ main(int argc, char *argv[])
  					}
  				}
  
@@ -142,8 +139,8 @@ Subject: dccp support
  				    sv ? sv->s_name : "*");
  			}
  			if (Fflag)
-@@ -1016,6 +1047,24 @@ unix_listen(char *path)
- 	return (s);
+@@ -1042,6 +1073,24 @@ unix_listen(char *path)
+ 	return s;
  }
  
 +char *proto_name(int uflag, int dccpflag) {
@@ -167,7 +164,7 @@ Subject: dccp support
  /*
   * remote_connect()
   * Returns a socket connected to a remote host. Properly binds to a local
-@@ -1046,8 +1095,21 @@ remote_connect(const char *host, const c
+@@ -1072,8 +1121,21 @@ remote_connect(const char *host, const c
  # endif
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res->ai_family;
@@ -191,7 +188,7 @@ Subject: dccp support
  			ahints.ai_flags = AI_PASSIVE;
  			if ((error = getaddrinfo(sflag, pflag, &ahints, &ares)))
  				errx(1, "getaddrinfo: %s", gai_strerror(error));
-@@ -1059,15 +1121,16 @@ remote_connect(const char *host, const c
+@@ -1085,15 +1147,16 @@ remote_connect(const char *host, const c
  		}
  
  		set_common_sockopts(s, res->ai_family);
@@ -211,7 +208,7 @@ Subject: dccp support
  
  		save_errno = errno;
  		close(s);
-@@ -1653,7 +1716,8 @@ build_ports(char *p)
+@@ -1685,7 +1748,8 @@ build_ports(char *p)
  	int hi, lo, cp;
  	int x = 0;
  
@@ -221,7 +218,7 @@ Subject: dccp support
  	if (sv) {
  		if (asprintf(&portlist[0], "%d", ntohs(sv->s_port)) < 0)
  			err(1, "asprintf");
-@@ -2004,6 +2068,7 @@ help(void)
+@@ -2052,6 +2116,7 @@ help(void)
  	\t-w timeout	Timeout for connects and final net reads\n\
  	\t-X proto	Proxy protocol: \"4\", \"5\" (SOCKS) or \"connect\"\n\
  	\t-x addr[:port]\tSpecify proxy address and port\n\
@@ -229,12 +226,12 @@ Subject: dccp support
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
  	exit(0);
-@@ -2013,7 +2078,7 @@ void
+@@ -2061,7 +2126,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,
 -	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
 +	    "usage: nc [-46CDdFhklNnrStUuvZz] [-I length] [-i interval] [-M ttl]\n"
  	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
- 	    "\t  [-q seconds] [-s source] [-T keyword] [-V rtable] [-w timeout] "
- 	    "[-X proxy_protocol]\n"
+ 	    "\t  [-q seconds] [-s source] [-T keyword] [-V rtable] [-W recvlimit] "
+ 	    "[-w timeout]\n"

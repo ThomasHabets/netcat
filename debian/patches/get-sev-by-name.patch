@@ -8,7 +8,7 @@ Subject: get sev by name
 
 --- a/netcat.c
 +++ b/netcat.c
-@@ -1603,11 +1603,16 @@ strtoport(char *portstr, int udp)
+@@ -1635,11 +1635,16 @@ strtoport(char *portstr, int udp)
  void
  build_ports(char *p)
  {

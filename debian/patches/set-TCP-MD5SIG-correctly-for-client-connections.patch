@@ -18,17 +18,17 @@ Subject: Set TCP MD5SIG correctly for client connections
  
  #ifndef IPTOS_LOWDELAY
  # define IPTOS_LOWDELAY 0x10
-@@ -172,6 +175,9 @@ char	*tls_expecthash;			/* required hash
+@@ -175,6 +178,9 @@ FILE	*Zflag;					/* file to save peer ce
  int	Cflag = 0;			/* CRLF line-ending */
  # endif
  
 +# if defined(TCP_MD5SIG) && defined(TCP_MD5SIG_MAXKEYLEN)
 +char Sflag_password[TCP_MD5SIG_MAXKEYLEN];
 +# endif
+ int recvcount, recvlimit;
  int timeout = -1;
  int family = AF_UNSPEC;
- char *portlist[PORT_MAX+1];
-@@ -200,7 +206,7 @@ int	udptest(int);
+@@ -205,7 +211,7 @@ int	udptest(int);
  int	unix_bind(char *, int);
  int	unix_connect(char *);
  int	unix_listen(char *);
@@ -37,7 +37,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  int	map_tos(char *, int *);
  # if defined(TLS)
  int	map_tls(char *, int *);
-@@ -427,7 +433,10 @@ main(int argc, char *argv[])
+@@ -447,7 +453,10 @@ main(int argc, char *argv[])
  			break;
  # endif
  		case 'S':
@@ -49,7 +49,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  			Sflag = 1;
  # else
  			errx(1, "no TCP MD5 signature support available");
-@@ -1119,7 +1128,7 @@ remote_connect(const char *host, const c
+@@ -1145,7 +1154,7 @@ remote_connect(const char *host, const c
  			freeaddrinfo(ares);
  		}
  
@@ -58,7 +58,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  		char *proto = proto_name(uflag, dccpflag);
  
  		if ((error = connect_with_timeout(s, res->ai_addr, res->ai_addrlen, timeout)) == CONNECTION_SUCCESS)
-@@ -1273,7 +1282,7 @@ local_listen(char *host, char *port, str
+@@ -1299,7 +1308,7 @@ local_listen(char *host, char *port, str
  			err(1, NULL);
  # endif
  
@@ -67,7 +67,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  
  		if (bind(s, (struct sockaddr *)res->ai_addr,
  		    res->ai_addrlen) == 0)
-@@ -1787,14 +1796,22 @@ udptest(int s)
+@@ -1819,14 +1828,22 @@ udptest(int s)
  }
  
  void

@@ -2,14 +2,14 @@ From: Guilhem Moulin <guilhem@debian.org>
 Date: Fri, 09 Jun 2017 13:21:23 +0200
 Subject: compile without TLS support
 
-tls.h isn't available in libsd-dev, and -C is already taken for
-CRLF line-ending in the Debian-specific patches.
+tls.h isn't available in libsd-dev, and TLS supports adds options (-C, -Z)
+that are already used by our Debian-specific patches.
 
 ---
  Makefile |    2 
- nc.1     |   63 -----------------------
- netcat.c |  166 +++++++++++++++++++++++++++++++++++++++++++++++++++++----------
- 3 files changed, 144 insertions(+), 87 deletions(-)
+ nc.1     |   69 -------------------------
+ netcat.c |  172 +++++++++++++++++++++++++++++++++++++++++++++++++++++----------
+ 3 files changed, 147 insertions(+), 96 deletions(-)
 
 --- a/Makefile
 +++ b/Makefile
@@ -46,7 +46,7 @@ CRLF line-ending in the Debian-specific patches.
  .Op Fl s Ar source
  .Op Fl T Ar keyword
  .Op Fl V Ar rtable
-@@ -101,20 +95,10 @@ to use IPv4 addresses only.
+@@ -103,20 +97,10 @@ to use IPv4 addresses only.
  Forces
  .Nm
  to use IPv6 addresses only.
@@ -67,7 +67,7 @@ CRLF line-ending in the Debian-specific patches.
  .It Fl F
  Pass the first connected socket using
  .Xr sendmsg 2
-@@ -130,11 +114,6 @@ using the
+@@ -132,11 +116,6 @@ using the
  .Xr ssh_config 5
  .Cm ProxyUseFdpass
  option).
@@ -79,7 +79,7 @@ CRLF line-ending in the Debian-specific patches.
  .It Fl h
  Prints out
  .Nm
-@@ -144,10 +123,6 @@ Specifies the size of the TCP receive bu
+@@ -146,10 +125,6 @@ Specifies the size of the TCP receive bu
  .It Fl i Ar interval
  Specifies a delay time interval between lines of text sent and received.
  Also causes a delay time between connections to multiple ports.
@@ -90,7 +90,7 @@ CRLF line-ending in the Debian-specific patches.
  .It Fl k
  Forces
  .Nm
-@@ -188,12 +163,6 @@ Do not do any DNS or service lookups on
+@@ -190,12 +165,6 @@ Do not do any DNS or service lookups on
  hostnames or ports.
  .It Fl O Ar length
  Specifies the size of the TCP send buffer.
@@ -103,7 +103,7 @@ CRLF line-ending in the Debian-specific patches.
  .It Fl P Ar proxy_username
  Specifies a username to present to a proxy server that requires authentication.
  If no username is specified then authentication will not be attempted.
-@@ -202,12 +171,6 @@ Proxy authentication is only supported f
+@@ -204,12 +173,6 @@ Proxy authentication is only supported f
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.
@@ -116,17 +116,19 @@ CRLF line-ending in the Debian-specific patches.
  .It Fl r
  Specifies that source and/or destination ports should be chosen randomly
  instead of sequentially within a range or in the order that the system
-@@ -224,24 +187,7 @@ It is an error to use this option in con
+@@ -226,26 +189,7 @@ It is an error to use this option in con
  .Fl l
  option.
  .It Fl T Ar keyword
 -Change IPv4 TOS value or TLS options.
 -For TLS options
 -.Ar keyword
--may be one of
--.Ar tlsall ;
--which allows the use of all supported TLS protocols and ciphers,
--.Ar noverify ;
+-may be one of:
+-.Ar tlsall ,
+-which allows the use of all supported TLS protocols and ciphers;
+-.Ar tlscompat ,
+-which allows the use of all supported TLS protocols and "compat" ciphers;
+-.Ar noverify ,
 -which disables certificate verification;
 -.Ar noname ,
 -which disables certificate name checking;
@@ -142,7 +144,18 @@ CRLF line-ending in the Debian-specific patches.
  .Ar keyword
  may be one of
  .Ar critical ,
-@@ -483,11 +429,6 @@ the source port, with a timeout of 5 sec
+@@ -336,10 +280,6 @@ for SOCKS, 3128 for HTTPS).
+ An IPv6 address can be specified unambiguously by enclosing
+ .Ar proxy_address
+ in square brackets.
+-.It Fl Z Ar peercertfile
+-Specifies the filename in which the peer supplied certificates will be saved
+-in PEM format.
+-May only be used with TLS.
+ .It Fl z
+ Specifies that
+ .Nm
+@@ -495,11 +435,6 @@ the source port, with a timeout of 5 sec
  .Pp
  .Dl $ nc -p 31337 -w 5 host.example.com 42
  .Pp
@@ -156,40 +169,42 @@ CRLF line-ending in the Debian-specific patches.
  .Dl $ nc -u host.example.com 53
 --- a/netcat.c
 +++ b/netcat.c
-@@ -99,7 +99,9 @@
+@@ -98,7 +98,9 @@
+ #include <stdlib.h>
  #include <string.h>
  #include <time.h>
- #include <unistd.h>
 -#include <tls.h>
 +#ifdef TLS
 +# include <tls.h>
 +#endif
+ #include <unistd.h>
  #include <bsd/stdlib.h>
  #include <bsd/string.h>
- #include "atomicio.h"
-@@ -112,13 +114,15 @@
- #define POLL_NETIN 2
- #define POLL_STDOUT 3
- #define BUFSIZE 16384
--#define DEFAULT_CA_FILE "/etc/ssl/cert.pem"
+@@ -113,14 +115,16 @@
+ #define POLL_NETIN	2
+ #define POLL_STDOUT	3
+ #define BUFSIZE		16384
+-#define DEFAULT_CA_FILE	"/etc/ssl/cert.pem"
 +#ifdef TLS
-+# define DEFAULT_CA_FILE "/etc/ssl/cert.pem"
++# define DEFAULT_CA_FILE	"/etc/ssl/cert.pem"
  
 -#define TLS_ALL	(1 << 1)
 -#define TLS_NOVERIFY	(1 << 2)
 -#define TLS_NONAME	(1 << 3)
 -#define TLS_CCERT	(1 << 4)
 -#define TLS_MUSTSTAPLE	(1 << 5)
+-#define TLS_COMPAT	(1 << 6)
 +# define TLS_ALL	(1 << 1)
 +# define TLS_NOVERIFY	(1 << 2)
 +# define TLS_NONAME	(1 << 3)
 +# define TLS_CCERT	(1 << 4)
 +# define TLS_MUSTSTAPLE	(1 << 5)
++# define TLS_COMPAT	(1 << 6)
 +#endif
  
  /* Command Line Options */
  int	dflag;					/* detached, no stdin */
-@@ -144,6 +148,7 @@ int	Sflag;					/* TCP MD5 signature opti
+@@ -146,6 +150,7 @@ int	Sflag;					/* TCP MD5 signature opti
  int	Tflag = -1;				/* IP Type of Service */
  int	rtableid = -1;
  
@@ -197,17 +212,17 @@ CRLF line-ending in the Debian-specific patches.
  int	usetls;					/* use TLS */
  char    *Cflag;					/* Public cert file */
  char    *Kflag;					/* Private key file */
-@@ -153,6 +158,7 @@ int	tls_cachanged;				/* Using non-defau
- int     TLSopt;					/* TLS options */
+@@ -156,6 +161,7 @@ int     TLSopt;					/* TLS options */
  char	*tls_expectname;			/* required name in peer cert */
  char	*tls_expecthash;			/* required hash of peer cert */
+ FILE	*Zflag;					/* file to save peer cert */
 +# endif
  
+ int recvcount, recvlimit;
  int timeout = -1;
- int family = AF_UNSPEC;
-@@ -165,10 +171,16 @@ void	atelnet(int, unsigned char *, unsig
+@@ -170,10 +176,16 @@ int	strtoport(char *portstr, int udp);
  void	build_ports(char *);
- void	help(void);
+ void	help(void) __attribute__((noreturn));
  int	local_listen(char *, char *, struct addrinfo);
 +# if defined(TLS)
  void	readwrite(int, struct tls *);
@@ -222,16 +237,17 @@ CRLF line-ending in the Debian-specific patches.
  int	timeout_connect(int, const struct sockaddr *, socklen_t);
  int	socks_connect(const char *, const char *, struct addrinfo,
  	    const char *, const char *, struct addrinfo, int, const char *);
-@@ -178,14 +190,23 @@ int	unix_connect(char *);
+@@ -183,15 +195,24 @@ int	unix_connect(char *);
  int	unix_listen(char *);
  void	set_common_sockopts(int, int);
  int	map_tos(char *, int *);
 +# if defined(TLS)
  int	map_tls(char *, int *);
+ void	save_peer_cert(struct tls *_tls_ctx, FILE *_fp);
 +# endif
  void	report_connect(const struct sockaddr *, socklen_t, char *);
 +# if defined(TLS)
- void	report_tls(struct tls *tls_ctx, char * host, char *tls_expectname);
+ void	report_tls(struct tls *tls_ctx, char * host);
 +# endif
  void	usage(int);
 +# if defined(TLS)
@@ -246,7 +262,7 @@ CRLF line-ending in the Debian-specific patches.
  
  int
  main(int argc, char *argv[])
-@@ -200,8 +221,10 @@ main(int argc, char *argv[])
+@@ -206,8 +227,10 @@ main(int argc, char *argv[])
  	const char *errstr;
  	struct addrinfo proxyhints;
  	char unix_dg_tmp_socket_buf[UNIX_DG_TMP_SOCKET_SIZE];
@@ -257,19 +273,19 @@ CRLF line-ending in the Debian-specific patches.
  
  	ret = 1;
  	socksv = 5;
-@@ -212,7 +235,11 @@ main(int argc, char *argv[])
+@@ -218,7 +241,11 @@ main(int argc, char *argv[])
  	signal(SIGPIPE, SIG_IGN);
  
  	while ((ch = getopt(argc, argv,
 +# if defined(TLS)
- 	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:R:rSs:T:tUuV:vw:X:x:z")) != -1) {
+ 	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:R:rSs:T:tUuV:vW:w:X:x:Z:z"))
 +# else
-+	    "46DdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vw:X:x:z")) != -1) {
++	    "46DdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vW:w:X:x:z"))
 +# endif
+ 	    != -1) {
  		switch (ch) {
  		case '4':
- 			family = AF_INET;
-@@ -233,24 +260,30 @@ main(int argc, char *argv[])
+@@ -240,24 +267,30 @@ main(int argc, char *argv[])
  			else
  				errx(1, "unsupported proxy protocol");
  			break;
@@ -300,7 +316,7 @@ CRLF line-ending in the Debian-specific patches.
  		case 'h':
  			help();
  			break;
-@@ -259,9 +292,11 @@ main(int argc, char *argv[])
+@@ -266,9 +299,11 @@ main(int argc, char *argv[])
  			if (errstr)
  				errx(1, "interval %s: %s", errstr, optarg);
  			break;
@@ -312,7 +328,7 @@ CRLF line-ending in the Debian-specific patches.
  		case 'k':
  			kflag = 1;
  			break;
-@@ -290,10 +325,12 @@ main(int argc, char *argv[])
+@@ -297,10 +332,12 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -325,7 +341,22 @@ CRLF line-ending in the Debian-specific patches.
  		case 'r':
  			rflag = 1;
  			break;
-@@ -348,9 +385,11 @@ main(int argc, char *argv[])
+@@ -342,12 +379,14 @@ main(int argc, char *argv[])
+ 			if ((proxy = strdup(optarg)) == NULL)
+ 				err(1, NULL);
+ 			break;
++# if defined(TLS)
+ 		case 'Z':
+ 			if (strcmp(optarg, "-") == 0)
+ 				Zflag = stderr;
+ 			else if ((Zflag = fopen(optarg, "w")) == NULL)
+ 				err(1, "can't open %s", optarg);
+ 			break;
++# endif
+ 		case 'z':
+ 			zflag = 1;
+ 			break;
+@@ -366,9 +405,11 @@ main(int argc, char *argv[])
  				errx(1, "TCP send window %s: %s",
  				    errstr, optarg);
  			break;
@@ -337,7 +368,7 @@ CRLF line-ending in the Debian-specific patches.
  		case 'S':
  # if defined(TCP_MD5SIG)
  			Sflag = 1;
-@@ -363,8 +402,10 @@ main(int argc, char *argv[])
+@@ -381,8 +422,10 @@ main(int argc, char *argv[])
  			errno = 0;
  			if (map_tos(optarg, &Tflag))
  				break;
@@ -348,7 +379,7 @@ CRLF line-ending in the Debian-specific patches.
  			if (strlen(optarg) > 1 && optarg[0] == '0' &&
  			    optarg[1] == 'x')
  				Tflag = (int)strtol(optarg, NULL, 16);
-@@ -372,7 +413,11 @@ main(int argc, char *argv[])
+@@ -390,7 +433,11 @@ main(int argc, char *argv[])
  				Tflag = (int)strtonum(optarg, 0, 255,
  				    &errstr);
  			if (Tflag < 0 || Tflag > 255 || errstr || errno)
@@ -360,7 +391,7 @@ CRLF line-ending in the Debian-specific patches.
  			break;
  		default:
  			usage(1);
-@@ -411,12 +456,15 @@ main(int argc, char *argv[])
+@@ -429,12 +476,15 @@ main(int argc, char *argv[])
  
  	if (!lflag && kflag)
  		errx(1, "must use -l with -k");
@@ -376,7 +407,7 @@ CRLF line-ending in the Debian-specific patches.
  	if (Fflag && usetls)
  		errx(1, "cannot use -c and -F");
  	if (TLSopt && !usetls)
-@@ -433,6 +481,7 @@ main(int argc, char *argv[])
+@@ -455,6 +505,7 @@ main(int argc, char *argv[])
  		errx(1, "you must specify -c to use -H");
  	if (tls_expectname && !usetls)
  		errx(1, "you must specify -c to use -e");
@@ -384,15 +415,15 @@ CRLF line-ending in the Debian-specific patches.
  
  	/* Get name of temporary socket for unix datagram client */
  	if ((family == AF_UNIX) && uflag && !lflag) {
-@@ -499,6 +548,7 @@ main(int argc, char *argv[])
+@@ -521,6 +572,7 @@ main(int argc, char *argv[])
  			proxyhints.ai_flags |= AI_NUMERICHOST;
  	}
  
 +# if defined(TLS)
  	if (usetls) {
- 		if (Pflag) {
- 			if (pledge("stdio inet dns tty rpath", NULL) == -1)
-@@ -544,8 +594,11 @@ main(int argc, char *argv[])
+ 		if (tls_init() == -1)
+ 			errx(1, "unable to initialize TLS");
+@@ -561,8 +613,11 @@ main(int argc, char *argv[])
  		} else if (pledge("stdio inet dns", NULL) == -1)
  			err(1, "pledge");
  	}
@@ -404,7 +435,7 @@ CRLF line-ending in the Debian-specific patches.
  		int connfd;
  		ret = 0;
  
-@@ -556,6 +609,7 @@ main(int argc, char *argv[])
+@@ -573,6 +628,7 @@ main(int argc, char *argv[])
  				s = unix_listen(host);
  		}
  
@@ -412,7 +443,7 @@ CRLF line-ending in the Debian-specific patches.
  		if (usetls) {
  			tls_config_verify_client_optional(tls_cfg);
  			if ((tls_ctx = tls_server()) == NULL)
-@@ -564,6 +618,7 @@ main(int argc, char *argv[])
+@@ -581,6 +637,7 @@ main(int argc, char *argv[])
  				errx(1, "tls configuration failed (%s)",
  				    tls_error(tls_ctx));
  		}
@@ -420,19 +451,19 @@ CRLF line-ending in the Debian-specific patches.
  		/* Allow only one connection at a time, but stay alive. */
  		for (;;) {
  			if (family != AF_UNIX)
-@@ -575,7 +630,11 @@ main(int argc, char *argv[])
- 			 * receive datagrams from multiple socket pairs.
- 			 */
- 			if (uflag && kflag)
+@@ -593,7 +650,11 @@ main(int argc, char *argv[])
+ 				 * let it receive datagrams from multiple
+ 				 * socket pairs.
+ 				 */
 +# if defined(TLS)
  				readwrite(s, NULL);
 +# else
 +				readwrite(s);
 +# endif
- 			/*
- 			 * For UDP and not -k, we will use recvfrom() initially
- 			 * to wait for a caller, then use the regular functions
-@@ -600,7 +659,11 @@ main(int argc, char *argv[])
+ 			} else if (uflag && !kflag) {
+ 				/*
+ 				 * For UDP and not -k, we will use recvfrom()
+@@ -618,7 +679,11 @@ main(int argc, char *argv[])
  				if (vflag)
  					report_connect((struct sockaddr *)&z, len, NULL);
  
@@ -444,7 +475,7 @@ CRLF line-ending in the Debian-specific patches.
  			} else {
  				len = sizeof(cliaddr);
  				connfd = accept4(s, (struct sockaddr *)&cliaddr,
-@@ -612,6 +675,7 @@ main(int argc, char *argv[])
+@@ -630,6 +695,7 @@ main(int argc, char *argv[])
  				if (vflag)
  					report_connect((struct sockaddr *)&cliaddr, len,
  					    family == AF_UNIX ? host : NULL);
@@ -452,7 +483,7 @@ CRLF line-ending in the Debian-specific patches.
  				if ((usetls) &&
  				    (tls_cctx = tls_setup_server(tls_ctx, connfd, host)))
  					readwrite(connfd, tls_cctx);
-@@ -622,6 +686,9 @@ main(int argc, char *argv[])
+@@ -640,6 +706,9 @@ main(int argc, char *argv[])
  					tls_free(tls_cctx);
  					tls_cctx = NULL;
  				}
@@ -462,7 +493,7 @@ CRLF line-ending in the Debian-specific patches.
  				close(connfd);
  			}
  			if (family != AF_UNIX)
-@@ -639,7 +706,11 @@ main(int argc, char *argv[])
+@@ -657,7 +726,11 @@ main(int argc, char *argv[])
  
  		if ((s = unix_connect(host)) > 0) {
  			if (!zflag)
@@ -474,7 +505,7 @@ CRLF line-ending in the Debian-specific patches.
  			close(s);
  		} else
  			ret = 1;
-@@ -659,6 +730,7 @@ main(int argc, char *argv[])
+@@ -677,6 +750,7 @@ main(int argc, char *argv[])
  			if (s != -1)
  				close(s);
  
@@ -482,7 +513,7 @@ CRLF line-ending in the Debian-specific patches.
  			if (usetls) {
  				if ((tls_ctx = tls_client()) == NULL)
  					errx(1, "tls client creation failed");
-@@ -666,6 +738,7 @@ main(int argc, char *argv[])
+@@ -684,6 +758,7 @@ main(int argc, char *argv[])
  					errx(1, "tls configuration failed (%s)",
  					    tls_error(tls_ctx));
  			}
@@ -490,7 +521,7 @@ CRLF line-ending in the Debian-specific patches.
  			if (xflag)
  				s = socks_connect(host, portlist[i], hints,
  				    proxy, proxyport, proxyhints, socksv,
-@@ -703,6 +776,7 @@ main(int argc, char *argv[])
+@@ -721,6 +796,7 @@ main(int argc, char *argv[])
  			}
  			if (Fflag)
  				fdpass(s);
@@ -498,7 +529,7 @@ CRLF line-ending in the Debian-specific patches.
  			else {
  				if (usetls)
  					tls_setup_client(tls_ctx, s, host);
-@@ -714,13 +788,19 @@ main(int argc, char *argv[])
+@@ -732,13 +808,19 @@ main(int argc, char *argv[])
  					tls_ctx = NULL;
  				}
  			}
@@ -516,17 +547,17 @@ CRLF line-ending in the Debian-specific patches.
  	tls_config_free(tls_cfg);
 +# endif
  
- 	exit(ret);
+ 	return ret;
  }
-@@ -759,6 +839,7 @@ unix_bind(char *path, int flags)
- 	return (s);
+@@ -778,6 +860,7 @@ unix_bind(char *path, int flags)
+ 	return s;
  }
  
 +# if defined(TLS)
  int
  timeout_tls(int s, struct tls *tls_ctx, int (*func)(struct tls *))
  {
-@@ -840,6 +921,7 @@ tls_setup_server(struct tls *tls_ctx, in
+@@ -864,6 +947,7 @@ tls_setup_server(struct tls *tls_ctx, in
  	}
  	return NULL;
  }
@@ -534,7 +565,7 @@ CRLF line-ending in the Debian-specific patches.
  
  /*
   * unix_connect()
-@@ -1052,7 +1134,11 @@ local_listen(char *host, char *port, str
+@@ -1076,7 +1160,11 @@ local_listen(char *host, char *port, str
   * Loop that polls on the network file descriptor and stdin.
   */
  void
@@ -546,7 +577,7 @@ CRLF line-ending in the Debian-specific patches.
  {
  	struct pollfd pfd[4];
  	int stdin_fd = STDIN_FILENO;
-@@ -1152,12 +1238,17 @@ readwrite(int net_fd, struct tls *tls_ct
+@@ -1176,12 +1264,17 @@ readwrite(int net_fd, struct tls *tls_ct
  		/* try to read from stdin */
  		if (pfd[POLL_STDIN].revents & POLLIN && stdinbufpos < BUFSIZE) {
  			ret = fillbuf(pfd[POLL_STDIN].fd, stdinbuf,
@@ -565,7 +596,7 @@ CRLF line-ending in the Debian-specific patches.
  				pfd[POLL_STDIN].fd = -1;
  			/* read something - poll net out */
  			if (stdinbufpos > 0)
-@@ -1169,12 +1260,17 @@ readwrite(int net_fd, struct tls *tls_ct
+@@ -1193,12 +1286,17 @@ readwrite(int net_fd, struct tls *tls_ct
  		/* try to write to network */
  		if (pfd[POLL_NETOUT].revents & POLLOUT && stdinbufpos > 0) {
  			ret = drainbuf(pfd[POLL_NETOUT].fd, stdinbuf,
@@ -584,7 +615,7 @@ CRLF line-ending in the Debian-specific patches.
  				pfd[POLL_NETOUT].fd = -1;
  			/* buffer empty - remove self from polling */
  			if (stdinbufpos == 0)
-@@ -1186,12 +1282,17 @@ readwrite(int net_fd, struct tls *tls_ct
+@@ -1210,12 +1308,17 @@ readwrite(int net_fd, struct tls *tls_ct
  		/* try to read from network */
  		if (pfd[POLL_NETIN].revents & POLLIN && netinbufpos < BUFSIZE) {
  			ret = fillbuf(pfd[POLL_NETIN].fd, netinbuf,
@@ -603,7 +634,7 @@ CRLF line-ending in the Debian-specific patches.
  				pfd[POLL_NETIN].fd = -1;
  			/* eof on net in - remove from pfd */
  			if (ret == 0) {
-@@ -1212,12 +1313,17 @@ readwrite(int net_fd, struct tls *tls_ct
+@@ -1242,12 +1345,17 @@ readwrite(int net_fd, struct tls *tls_ct
  		/* try to write to stdout */
  		if (pfd[POLL_STDOUT].revents & POLLOUT && netinbufpos > 0) {
  			ret = drainbuf(pfd[POLL_STDOUT].fd, netinbuf,
@@ -622,7 +653,7 @@ CRLF line-ending in the Debian-specific patches.
  				pfd[POLL_STDOUT].fd = -1;
  			/* buffer empty - remove self from polling */
  			if (netinbufpos == 0)
-@@ -1241,19 +1347,29 @@ readwrite(int net_fd, struct tls *tls_ct
+@@ -1271,19 +1379,29 @@ readwrite(int net_fd, struct tls *tls_ct
  }
  
  ssize_t
@@ -652,7 +683,7 @@ CRLF line-ending in the Debian-specific patches.
  	if (n <= 0)
  		return n;
  	/* adjust buffer */
-@@ -1265,19 +1381,29 @@ drainbuf(int fd, unsigned char *buf, siz
+@@ -1295,19 +1413,29 @@ drainbuf(int fd, unsigned char *buf, siz
  }
  
  ssize_t
@@ -682,15 +713,15 @@ CRLF line-ending in the Debian-specific patches.
  	if (n <= 0)
  		return n;
  	*bufpos += n;
-@@ -1595,6 +1721,7 @@ map_tos(char *s, int *val)
- 	return (0);
+@@ -1625,6 +1753,7 @@ map_tos(char *s, int *val)
+ 	return 0;
  }
  
 +# if defined(TLS)
  int
  map_tls(char *s, int *val)
  {
-@@ -1676,6 +1803,7 @@ report_tls(struct tls * tls_ctx, char *
+@@ -1721,6 +1850,7 @@ report_tls(struct tls * tls_ctx, char *
  
  	}
  }
@@ -698,7 +729,7 @@ CRLF line-ending in the Debian-specific patches.
  
  void
  report_connect(const struct sockaddr *sa, socklen_t salen, char *path)
-@@ -1718,17 +1846,12 @@ help(void)
+@@ -1763,17 +1893,12 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -716,7 +747,7 @@ CRLF line-ending in the Debian-specific patches.
  	\t-k		Keep inbound sockets open for multiple connects\n\
  	\t-l		Listen mode, for inbound connects\n\
  	\t-M ttl		Outgoing TTL / Hop Limit\n\
-@@ -1736,14 +1859,12 @@ help(void)
+@@ -1781,14 +1906,12 @@ help(void)
  	\t-N		Shutdown the network socket after EOF on stdin\n\
  	\t-n		Suppress name/port resolutions\n\
  	\t-O length	TCP send buffer length\n\
@@ -732,7 +763,15 @@ CRLF line-ending in the Debian-specific patches.
  	\t-t		Answer TELNET negotiation\n\
  	\t-U		Use UNIX domain socket\n\
  	\t-u		UDP mode\n\
-@@ -1761,11 +1882,8 @@ void
+@@ -1798,7 +1921,6 @@ help(void)
+ 	\t-w timeout	Timeout for connects and final net reads\n\
+ 	\t-X proto	Proxy protocol: \"4\", \"5\" (SOCKS) or \"connect\"\n\
+ 	\t-x addr[:port]\tSpecify proxy address and port\n\
+-	\t-Z		Peer certificate file\n\
+ 	\t-z		Zero-I/O mode [used for scanning]\n\
+ 	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
+ 	exit(0);
+@@ -1808,15 +1930,11 @@ void
  usage(int ret)
  {
  	fprintf(stderr,
@@ -743,6 +782,10 @@ CRLF line-ending in the Debian-specific patches.
 -	    "[-R CAfile]\n"
 +	    "usage: nc [-46DdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
 +	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
- 	    "\t  [-s source] [-T keyword] [-V rtable] [-w timeout] "
- 	    "[-X proxy_protocol]\n"
- 	    "\t  [-x proxy_address[:port]] [destination] [port]\n");
+ 	    "\t  [-s source] [-T keyword] [-V rtable] [-W recvlimit] "
+ 	    "[-w timeout]\n"
+ 	    "\t  [-X proxy_protocol] [-x proxy_address[:port]] "
+-	    "[-Z peercertfile]\n"
+ 	    "\t  [destination] [port]\n");
+ 	if (ret)
+ 		exit(1);
