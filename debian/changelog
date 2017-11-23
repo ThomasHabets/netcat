@@ -1,3 +1,9 @@
+netcat-openbsd (1.187-1) UNRELEASED; urgency=low
+
+  * New upstream release (from OpenBSD 6.2)
+
+ -- Guilhem Moulin <guilhem@debian.org>  Thu, 23 Nov 2017 04:01:10 +0100
+
 netcat-openbsd (1.178-3) unstable; urgency=low
 
   * Fix FTBFS on hurd-i386.
