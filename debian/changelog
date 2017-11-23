@@ -2,6 +2,9 @@ netcat-openbsd (1.187-1) UNRELEASED; urgency=low
 
   * New upstream release (from OpenBSD 6.2)
   * debian/control: Bump Standards-Version to 4.1.1 (no changes necessary).
+  * debian/patches/send-crlf.patch: clarify in the manpage that the "-C" flag
+    (translate LF to CR+LF) only affects input data, and that LF characters
+    that are already preceded with CR are not translated.  Closes: #861062.
 
  -- Guilhem Moulin <guilhem@debian.org>  Thu, 23 Nov 2017 04:01:10 +0100
 

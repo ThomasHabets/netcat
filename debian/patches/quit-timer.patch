@@ -17,7 +17,7 @@ Subject: quit timer
  .Op Fl s Ar source
  .Op Fl T Ar keyword
  .Op Fl V Ar rtable
-@@ -175,6 +176,15 @@ Proxy authentication is only supported f
+@@ -178,6 +179,15 @@ Proxy authentication is only supported f
  Specifies the source port
  .Nm
  should use, subject to privilege restrictions and availability.

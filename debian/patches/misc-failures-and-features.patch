@@ -38,9 +38,9 @@ Subject: misc failures and features
 +.It Fl b
 +Allow broadcast.
  .It Fl C
- Send CRLF as line-ending.
- .It Fl D
-@@ -358,6 +360,54 @@ and which side is being used as a
+ Send CRLF as line-ending.  Each line feed (LF) character from the input
+ data is translated into CR+LF before being written to the socket.  Line
+@@ -361,6 +363,54 @@ and which side is being used as a
  The connection may be terminated using an
  .Dv EOF
  .Pq Sq ^D .
@@ -95,7 +95,7 @@ Subject: misc failures and features
  .Sh DATA TRANSFER
  The example in the previous section can be expanded to build a
  basic data transfer model.
-@@ -417,15 +467,30 @@ The
+@@ -420,15 +470,30 @@ The
  flag can be used to tell
  .Nm
  to report open ports,
@@ -129,7 +129,7 @@ Subject: misc failures and features
  .Pp
  Alternatively, it might be useful to know which server software
  is running, and which versions.
-@@ -490,6 +555,9 @@ Original implementation by *Hobbit*
+@@ -493,6 +558,9 @@ Original implementation by *Hobbit*
  .br
  Rewritten with IPv6 support by
  .An Eric Jackson Aq Mt ericj@monkey.org .

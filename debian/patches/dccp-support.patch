@@ -18,7 +18,7 @@ Subject: dccp support
  .Op Fl I Ar length
  .Op Fl i Ar interval
  .Op Fl M Ar ttl
-@@ -292,6 +292,8 @@ for SOCKS, 3128 for HTTPS).
+@@ -295,6 +295,8 @@ for SOCKS, 3128 for HTTPS).
  An IPv6 address can be specified unambiguously by enclosing
  .Ar proxy_address
  in square brackets.

@@ -3,9 +3,9 @@ Date: Mon, 13 Feb 2012 14:57:45 +0800
 Subject: send crlf
 
 ---
- nc.1     |    6 +++--
+ nc.1     |    9 ++++++-
  netcat.c |   72 +++++++++++++++++++++++++++++++++++----------------------------
- 2 files changed, 45 insertions(+), 33 deletions(-)
+ 2 files changed, 48 insertions(+), 33 deletions(-)
 
 --- a/nc.1
 +++ b/nc.1
@@ -18,16 +18,19 @@ Subject: send crlf
  .Op Fl I Ar length
  .Op Fl i Ar interval
  .Op Fl M Ar ttl
-@@ -97,6 +97,8 @@ to use IPv4 addresses only.
+@@ -97,6 +97,11 @@ to use IPv4 addresses only.
  Forces
  .Nm
  to use IPv6 addresses only.
 +.It Fl C
-+Send CRLF as line-ending.
++Send CRLF as line-ending.  Each line feed (LF) character from the input
++data is translated into CR+LF before being written to the socket.  Line
++feed characters that are already preceded with a carriage return (CR)
++are not translated.  Received data is not affected.
  .It Fl D
  Enable debugging on the socket.
  .It Fl d
-@@ -385,7 +387,7 @@ More complicated examples can be built u
+@@ -385,7 +390,7 @@ More complicated examples can be built u
  of requests required by the server.
  As another example, an email may be submitted to an SMTP server using:
  .Bd -literal -offset indent
