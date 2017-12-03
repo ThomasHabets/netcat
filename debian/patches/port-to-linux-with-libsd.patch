@@ -185,10 +185,10 @@ Subject: port to linux with libsd
 +	} else if (!argv[0] && lflag) {
 +		if (sflag)
 +			errx(1, "cannot use -s and -l");
++		if (pflag)
++			errx(1, "cannot use -p and -l");
 +		if (zflag)
 +			errx(1, "cannot use -z and -l");
-+		if (pflag)
-+			uport=pflag;
  	} else if (argv[0] && !argv[1]) {
  		if (!lflag)
  			usage(1);
