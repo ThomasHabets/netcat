@@ -1,4 +1,4 @@
-netcat-openbsd (1.187-1) UNRELEASED; urgency=low
+netcat-openbsd (1.187-1) unstable; urgency=low
 
   * New upstream release (from OpenBSD 6.2)
   * debian/control: Bump Standards-Version to 4.1.1 (no changes necessary).
@@ -9,7 +9,7 @@ netcat-openbsd (1.187-1) UNRELEASED; urgency=low
     -p 12345 -s ::1` now behave as `nc -l -p 12345 ::1` and `nc -l ::1 12345`.
     Closes: #879853.
 
- -- Guilhem Moulin <guilhem@debian.org>  Thu, 23 Nov 2017 04:01:10 +0100
+ -- Guilhem Moulin <guilhem@debian.org>  Sun, 03 Dec 2017 23:01:07 +0100
 
 netcat-openbsd (1.178-3) unstable; urgency=low
 
