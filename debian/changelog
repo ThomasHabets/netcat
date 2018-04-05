@@ -1,3 +1,9 @@
+netcat-openbsd (1.190-1) UNRELEASED; urgency=low
+
+  * New upstream release (from OpenBSD 6.3)
+
+ -- Guilhem Moulin <guilhem@debian.org>  Thu, 05 Apr 2018 02:39:07 +0200
+
 netcat-openbsd (1.187-1) unstable; urgency=low
 
   * New upstream release (from OpenBSD 6.2)
