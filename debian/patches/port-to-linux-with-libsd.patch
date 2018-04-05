@@ -42,7 +42,7 @@ Subject: port to linux with libsd
  .It Fl R Ar CAfile
  Specifies the filename from which the root CA bundle for certificate
  verification is loaded, in PEM format.
-@@ -253,6 +250,7 @@ For IPv4 TOS value
+@@ -258,6 +255,7 @@ For IPv4 TOS value
  may be one of
  .Ar critical ,
  .Ar inetcontrol ,
@@ -120,7 +120,7 @@ Subject: port to linux with libsd
  
  #include "atomicio.h"
  
-@@ -267,10 +314,14 @@ main(int argc, char *argv[])
+@@ -268,10 +315,14 @@ main(int argc, char *argv[])
  			uflag = 1;
  			break;
  		case 'V':
@@ -135,7 +135,7 @@ Subject: port to linux with libsd
  			break;
  		case 'v':
  			vflag = 1;
-@@ -319,7 +370,11 @@ main(int argc, char *argv[])
+@@ -320,7 +371,11 @@ main(int argc, char *argv[])
  			oflag = optarg;
  			break;
  		case 'S':
@@ -147,7 +147,7 @@ Subject: port to linux with libsd
  			break;
  		case 'T':
  			errstr = NULL;
-@@ -344,35 +399,23 @@ main(int argc, char *argv[])
+@@ -345,35 +400,23 @@ main(int argc, char *argv[])
  	argc -= optind;
  	argv += optind;
  
@@ -192,7 +192,7 @@ Subject: port to linux with libsd
  	} else if (argv[0] && !argv[1]) {
  		if (!lflag)
  			usage(1);
-@@ -384,12 +427,6 @@ main(int argc, char *argv[])
+@@ -385,12 +428,6 @@ main(int argc, char *argv[])
  	} else
  		usage(1);
  
@@ -205,7 +205,7 @@ Subject: port to linux with libsd
  	if (!lflag && kflag)
  		errx(1, "must use -l with -k");
  	if (uflag && usetls)
-@@ -426,8 +463,8 @@ main(int argc, char *argv[])
+@@ -425,8 +462,8 @@ main(int argc, char *argv[])
  		} else {
  			strlcpy(unix_dg_tmp_socket_buf, "/tmp/nc.XXXXXXXXXX",
  			    UNIX_DG_TMP_SOCKET_SIZE);
@@ -216,7 +216,7 @@ Subject: port to linux with libsd
  			unix_dg_tmp_socket = unix_dg_tmp_socket_buf;
  		}
  	}
-@@ -907,8 +944,10 @@ remote_connect(const char *host, const c
+@@ -901,8 +938,10 @@ remote_connect(const char *host, const c
  		if (sflag || pflag) {
  			struct addrinfo ahints, *ares;
  
@@ -227,7 +227,7 @@ Subject: port to linux with libsd
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res->ai_family;
  			ahints.ai_socktype = uflag ? SOCK_DGRAM : SOCK_STREAM;
-@@ -1000,9 +1039,15 @@ local_listen(char *host, char *port, str
+@@ -994,9 +1033,15 @@ local_listen(char *host, char *port, str
  		    res->ai_protocol)) < 0)
  			continue;
  
@@ -243,7 +243,7 @@ Subject: port to linux with libsd
  
  		set_common_sockopts(s, res->ai_family);
  
-@@ -1458,11 +1503,13 @@ set_common_sockopts(int s, int af)
+@@ -1452,11 +1497,13 @@ set_common_sockopts(int s, int af)
  {
  	int x = 1;
  
@@ -257,7 +257,7 @@ Subject: port to linux with libsd
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
-@@ -1473,9 +1520,14 @@ set_common_sockopts(int s, int af)
+@@ -1467,9 +1514,14 @@ set_common_sockopts(int s, int af)
  		    IP_TOS, &Tflag, sizeof(Tflag)) == -1)
  			err(1, "set IP ToS");
  
@@ -272,7 +272,7 @@ Subject: port to linux with libsd
  	}
  	if (Iflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_RCVBUF,
-@@ -1493,19 +1545,34 @@ set_common_sockopts(int s, int af)
+@@ -1487,19 +1539,34 @@ set_common_sockopts(int s, int af)
  		    IP_TTL, &ttl, sizeof(ttl)))
  			err(1, "set IP TTL");
  
@@ -307,7 +307,7 @@ Subject: port to linux with libsd
  	}
  }
  
-@@ -1540,6 +1607,7 @@ map_tos(char *s, int *val)
+@@ -1534,6 +1601,7 @@ process_tos_opt(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -315,7 +315,7 @@ Subject: port to linux with libsd
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -1688,6 +1756,9 @@ report_connect(const struct sockaddr *sa
+@@ -1699,6 +1767,9 @@ report_connect(const struct sockaddr *sa
  void
  help(void)
  {
@@ -325,7 +325,7 @@ Subject: port to linux with libsd
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -1730,7 +1801,7 @@ help(void)
+@@ -1741,7 +1812,7 @@ help(void)
  	\t-Z		Peer certificate file\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");

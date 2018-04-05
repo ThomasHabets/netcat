@@ -34,10 +34,10 @@ Subject: Set TCP MD5SIG correctly for client connections
  int	unix_listen(char *);
 -void	set_common_sockopts(int, int);
 +void	set_common_sockopts(int, const struct sockaddr *);
- int	map_tos(char *, int *);
+ int	process_tos_opt(char *, int *);
  # if defined(TLS)
- int	map_tls(char *, int *);
-@@ -447,7 +453,10 @@ main(int argc, char *argv[])
+ int	process_tls_opt(char *, int *);
+@@ -448,7 +454,10 @@ main(int argc, char *argv[])
  			break;
  # endif
  		case 'S':
@@ -49,7 +49,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  			Sflag = 1;
  # else
  			errx(1, "no TCP MD5 signature support available");
-@@ -1145,7 +1154,7 @@ remote_connect(const char *host, const c
+@@ -1139,7 +1148,7 @@ remote_connect(const char *host, const c
  			freeaddrinfo(ares);
  		}
  
@@ -58,7 +58,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  		char *proto = proto_name(uflag, dccpflag);
  
  		if ((error = connect_with_timeout(s, res->ai_addr, res->ai_addrlen, timeout)) == CONNECTION_SUCCESS)
-@@ -1299,7 +1308,7 @@ local_listen(char *host, char *port, str
+@@ -1293,7 +1302,7 @@ local_listen(char *host, char *port, str
  			err(1, NULL);
  # endif
  
@@ -67,7 +67,7 @@ Subject: Set TCP MD5SIG correctly for client connections
  
  		if (bind(s, (struct sockaddr *)res->ai_addr,
  		    res->ai_addrlen) == 0)
-@@ -1819,14 +1828,22 @@ udptest(int s)
+@@ -1813,14 +1822,22 @@ udptest(int s)
  }
  
  void

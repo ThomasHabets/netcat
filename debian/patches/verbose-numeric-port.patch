@@ -16,7 +16,7 @@ Subject: verbose numeric port
  #ifdef __linux__
  # include <linux/in6.h>
  #endif
-@@ -670,6 +671,18 @@ main(int argc, char *argv[])
+@@ -665,6 +666,18 @@ main(int argc, char *argv[])
  				s = local_listen(host, uport, hints);
  			if (s < 0)
  				err(1, NULL);
@@ -35,16 +35,15 @@ Subject: verbose numeric port
  			if (uflag && kflag) {
  				/*
  				 * For UDP and -k, don't connect the socket,
-@@ -689,21 +702,20 @@ main(int argc, char *argv[])
+@@ -684,20 +697,19 @@ main(int argc, char *argv[])
  				 */
- 				int rv, plen;
- 				char buf[16384];
+ 				int rv;
+ 				char buf[2048];
 -				struct sockaddr_storage z;
  
 -				len = sizeof(z);
 +				len = sizeof(cliaddr);
- 				plen = 2048;
- 				rv = recvfrom(s, buf, plen, MSG_PEEK,
+ 				rv = recvfrom(s, buf, sizeof(buf), MSG_PEEK,
 -				    (struct sockaddr *)&z, &len);
 +				    (struct sockaddr *)&cliaddr, &len);
  				if (rv < 0)

@@ -35,7 +35,7 @@ Subject: quit timer
  instead of sequentially within a range or in the order that the system
 --- a/netcat.c
 +++ b/netcat.c
-@@ -141,6 +141,7 @@ int	Nflag;					/* shutdown() network soc
+@@ -139,6 +139,7 @@ int	Nflag;					/* shutdown() network soc
  int	nflag;					/* Don't do name look up */
  char   *Pflag;					/* Proxy username */
  char   *pflag;					/* Localport flag */
@@ -52,7 +52,7 @@ Subject: quit timer
  int
  main(int argc, char *argv[])
  {
-@@ -252,9 +255,9 @@ main(int argc, char *argv[])
+@@ -253,9 +256,9 @@ main(int argc, char *argv[])
  
  	while ((ch = getopt(argc, argv,
  # if defined(TLS)
@@ -64,7 +64,7 @@ Subject: quit timer
  # endif
  	    != -1) {
  		switch (ch) {
-@@ -346,6 +349,13 @@ main(int argc, char *argv[])
+@@ -347,6 +350,13 @@ main(int argc, char *argv[])
  		case 'p':
  			pflag = optarg;
  			break;
@@ -78,7 +78,7 @@ Subject: quit timer
  # if defined(TLS)
  		case 'R':
  			tls_cachanged = 1;
-@@ -1279,15 +1289,27 @@ readwrite(int net_fd)
+@@ -1273,15 +1283,27 @@ readwrite(int net_fd)
  	while (1) {
  		/* both inputs are gone, buffers are empty, we are done */
  		if (pfd[POLL_STDIN].fd == -1 && pfd[POLL_NETIN].fd == -1 &&
@@ -112,7 +112,7 @@ Subject: quit timer
  
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
-@@ -1997,6 +2019,7 @@ help(void)
+@@ -2008,6 +2030,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -120,7 +120,7 @@ Subject: quit timer
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s source	Local source address\n\
-@@ -2021,10 +2044,19 @@ usage(int ret)
+@@ -2032,10 +2055,19 @@ usage(int ret)
  	fprintf(stderr,
  	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
  	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
