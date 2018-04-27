@@ -59,7 +59,7 @@ Subject: quit timer
 -	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:R:rSs:T:tUuV:vW:w:X:x:Z:z"))
 +	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:q:R:rSs:T:tUuV:vW:w:X:x:Z:z"))
  # else
-- 	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vW:w:X:x:z"))
+-	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vW:w:X:x:z"))
 +	    "46CDdFhI:i:klM:m:NnO:P:p:q:rSs:T:tUuV:vW:w:X:x:z"))
  # endif
  	    != -1) {
@@ -68,7 +68,7 @@ Subject: quit timer
  		case 'p':
  			pflag = optarg;
  			break;
-+ 		case 'q':
++		case 'q':
 +			qflag = strtonum(optarg, INT_MIN, INT_MAX, &errstr);
 +			if (errstr)
 +				errx(1, "quit timer %s: %s", errstr, optarg);
@@ -84,7 +84,7 @@ Subject: quit timer
  		if (pfd[POLL_STDIN].fd == -1 && pfd[POLL_NETIN].fd == -1 &&
 -		    stdinbufpos == 0 && netinbufpos == 0)
 -			return;
-+ 		    stdinbufpos == 0 && netinbufpos == 0) {
++		    stdinbufpos == 0 && netinbufpos == 0) {
 +			if (qflag <= 0)
 +				return;
 +			goto delay_exit;
@@ -96,7 +96,7 @@ Subject: quit timer
 +			if (qflag <= 0)
 +				return;
 +			goto delay_exit;
-+ 		}
++		}
  		/* listen and net in gone, queues empty, done */
  		if (lflag && pfd[POLL_NETIN].fd == -1 &&
 -		    stdinbufpos == 0 && netinbufpos == 0)
@@ -108,7 +108,7 @@ Subject: quit timer
 +			close(net_fd);
 +			signal(SIGALRM, quit);
 +			alarm(qflag);
-+ 		}
++		}
  
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);

@@ -344,7 +344,7 @@ Subject: misc failures and features
  	} else {
 -		if ((s = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0)) < 0)
 +		if ((s = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0)) < 0) {
-+ 			errx(1,"create unix socket failed");
++			errx(1,"create unix socket failed");
  			return -1;
 +		}
  	}
@@ -354,12 +354,12 @@ Subject: misc failures and features
  	    sizeof(s_un.sun_path)) {
  		close(s);
  		errno = ENAMETOOLONG;
-+ 		warn("unix connect abandoned");
++		warn("unix connect abandoned");
  		return -1;
  	}
  	if (connect(s, (struct sockaddr *)&s_un, sizeof(s_un)) < 0) {
  		save_errno = errno;
-+ 		warn("unix connect failed");
++		warn("unix connect failed");
  		close(s);
  		errno = save_errno;
  		return -1;

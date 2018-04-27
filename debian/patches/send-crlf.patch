@@ -64,7 +64,7 @@ Subject: send crlf
  	    "46C:cDde:FH:hI:i:K:klM:m:NnO:o:P:p:R:rSs:T:tUuV:vW:w:X:x:Z:z"))
  # else
 -	    "46DdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vW:w:X:x:z"))
-+ 	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vW:w:X:x:z"))
++	    "46CDdFhI:i:klM:m:NnO:P:p:rSs:T:tUuV:vW:w:X:x:z"))
  # endif
  	    != -1) {
  		switch (ch) {
