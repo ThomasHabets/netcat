@@ -8,7 +8,7 @@ Subject: serialized handling multiple clients
 
 --- a/netcat.c
 +++ b/netcat.c
-@@ -678,7 +678,20 @@ main(int argc, char *argv[])
+@@ -676,7 +676,20 @@ main(int argc, char *argv[])
  				s = unix_bind(host, 0);
  			else
  				s = unix_listen(host);
@@ -30,7 +30,7 @@ Subject: serialized handling multiple clients
  
  # if defined(TLS)
  		if (usetls) {
-@@ -692,22 +705,7 @@ main(int argc, char *argv[])
+@@ -690,22 +703,7 @@ main(int argc, char *argv[])
  # endif
  		/* Allow only one connection at a time, but stay alive. */
  		for (;;) {
@@ -54,7 +54,7 @@ Subject: serialized handling multiple clients
  			if (uflag && kflag) {
  				/*
  				 * For UDP and -k, don't connect the socket,
-@@ -773,15 +771,16 @@ main(int argc, char *argv[])
+@@ -771,15 +769,16 @@ main(int argc, char *argv[])
  # endif
  				close(connfd);
  			}

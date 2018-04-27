@@ -4,9 +4,9 @@ Subject: misc failures and features
 
 ---
  Makefile |    3 +
- nc.1     |   98 +++++++++++++++++++++++++++++++++++++++++++++++++++++++--------
- netcat.c |   98 +++++++++++++++++++++++++++++++++++++++++++--------------------
- 3 files changed, 156 insertions(+), 43 deletions(-)
+ nc.1     |   98 +++++++++++++++++++++++++++++++++++++++++++++++++-------
+ netcat.c |  109 +++++++++++++++++++++++++++++++++++++++++++--------------------
+ 3 files changed, 163 insertions(+), 47 deletions(-)
 
 --- a/Makefile
 +++ b/Makefile
@@ -246,18 +246,15 @@ Subject: misc failures and features
  		case 'U':
  			family = AF_UNIX;
  			break;
-@@ -499,33 +511,41 @@ main(int argc, char *argv[])
+@@ -499,31 +511,42 @@ main(int argc, char *argv[])
  # endif
  
  	/* Cruft to make sure options are clean, and used properly. */
 -	if (argv[0] && !argv[1] && family == AF_UNIX) {
-- 		if (uflag)
-- 			errx(1, "cannot use -u and -U");
-+	if (family == AF_UNIX) {
- # if defined(IPPROTO_DCCP) && defined(SOCK_DCCP)
- 		if (dccpflag)
- 			errx(1, "cannot use -Z and -U");
- # endif
+-# if defined(IPPROTO_DCCP) && defined(SOCK_DCCP)
+-		if (dccpflag)
+-			errx(1, "cannot use -Z and -U");
+-# endif
 -		host = argv[0];
 -		uport = NULL;
 -	} else if (!argv[0] && lflag) {
@@ -269,43 +266,51 @@ Subject: misc failures and features
 -			errx(1, "cannot use -z and -l");
 -	} else if (argv[0] && !argv[1]) {
 -		if (!lflag)
-+		if (!argv[0] && sflag)
-+			host = sflag;
-+		else if (argv[0] && !argv[1] && !sflag)
-+			host = argv[0];
-+		else
- 			usage(1);
+-			usage(1);
 -		uport = argv[0];
 -		host = NULL;
-+		uport = NULL;
-+	} else if (argv[0] && !argv[1] && lflag) {
-+		if (pflag) {
-+			uport = &pflag;
-+			host = argv[0];
-+			if (sflag)
-+				usage(1);
-+		} else {
-+			uport = argv;
-+			host = sflag;
-+		}
-+	} else if (!argv[0] && lflag && pflag) {
+-	} else if (argv[0] && argv[1]) {
++	if (argc == 0 && lflag) {
 +		uport = &pflag;
 +		host = sflag;
- 	} else if (argv[0] && argv[1]) {
++	} else if (argc == 1 && !pflag && !sflag) {
++		if (family == AF_UNIX) {
++			host = argv[0];
++			uport = NULL;
++		} else if (lflag) {
++			host  = NULL;
++			uport = argv;
++		}
++	} else if (argc == 2) {
++		if (lflag && (pflag || sflag))
++			usage(1); /* conflict */
  		host = argv[0];
 -		uport = argv[1];
-+ 		uport = &argv[1];
-+		if (lflag && (pflag || sflag))
-+			usage(1);
++		uport = &argv[1];
  	} else
  		usage(1);
  
++	if (family == AF_UNIX) {
++# if defined(IPPROTO_DCCP) && defined(SOCK_DCCP)
++		if (dccpflag)
++			errx(1, "cannot use -Z and -U");
++# endif
++		if (uport && *uport)
++			errx(1, "cannot use port with -U");
++		if (!host)
++			errx(1, "missing socket pathname");
++	} else {
++		if (!uport || !*uport)
++			errx(1, "missing port number");
++		if (!lflag && !host)
++			errx(1, "missing destination address");
++	}
 +	if (lflag && zflag)
 +		errx(1, "cannot use -z and -l");
  	if (!lflag && kflag)
  		errx(1, "must use -l with -k");
  # if defined(TLS)
-@@ -688,7 +708,7 @@ main(int argc, char *argv[])
+@@ -686,7 +709,7 @@ main(int argc, char *argv[])
  			else
  				s = unix_listen(host);
  		} else
@@ -314,7 +319,7 @@ Subject: misc failures and features
  		if (s < 0)
  			err(1, NULL);
  
-@@ -697,7 +717,8 @@ main(int argc, char *argv[])
+@@ -695,7 +718,8 @@ main(int argc, char *argv[])
  			local = "::";
  		else
  			local = "0.0.0.0";
@@ -324,7 +329,7 @@ Subject: misc failures and features
  			host ?: local,
  			family,
  			*uport);
-@@ -911,6 +932,8 @@ unix_bind(char *path, int flags)
+@@ -909,6 +933,8 @@ unix_bind(char *path, int flags)
  	    0)) < 0)
  		return -1;
  
@@ -333,7 +338,7 @@ Subject: misc failures and features
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
  	s_un.sun_family = AF_UNIX;
  
-@@ -1034,8 +1057,10 @@ unix_connect(char *path)
+@@ -1032,8 +1058,10 @@ unix_connect(char *path)
  		if ((s = unix_bind(unix_dg_tmp_socket, SOCK_CLOEXEC)) < 0)
  			return -1;
  	} else {
@@ -345,7 +350,7 @@ Subject: misc failures and features
  	}
  
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
-@@ -1045,10 +1070,12 @@ unix_connect(char *path)
+@@ -1043,10 +1071,12 @@ unix_connect(char *path)
  	    sizeof(s_un.sun_path)) {
  		close(s);
  		errno = ENAMETOOLONG;
@@ -358,7 +363,7 @@ Subject: misc failures and features
  		close(s);
  		errno = save_errno;
  		return -1;
-@@ -1743,25 +1770,26 @@ strtoport(char *portstr, int udp)
+@@ -1741,25 +1771,26 @@ strtoport(char *portstr, int udp)
   * that we should try to connect to.
   */
  void
@@ -389,7 +394,7 @@ Subject: misc failures and features
  		if (lo > hi) {
  			cp = hi;
  			hi = lo;
-@@ -1789,7 +1817,7 @@ build_ports(char *p)
+@@ -1787,7 +1818,7 @@ build_ports(char *p)
  	} else {
  		char *tmp;
  
@@ -398,7 +403,7 @@ Subject: misc failures and features
  		if (asprintf(&tmp, "%d", hi) != -1)
  			portlist[0] = tmp;
  		else
-@@ -1827,6 +1855,15 @@ set_common_sockopts(int s, const struct
+@@ -1825,6 +1856,15 @@ set_common_sockopts(int s, const struct
  	int x = 1;
  	int af = sa->sa_family;
  
@@ -414,7 +419,7 @@ Subject: misc failures and features
  # if defined(TCP_MD5SIG) && defined(TCP_MD5SIG_MAXKEYLEN)
  	if (Sflag) {
  		struct tcp_md5sig sig;
-@@ -2113,6 +2150,7 @@ help(void)
+@@ -2111,6 +2151,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
