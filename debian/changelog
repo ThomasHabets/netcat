@@ -1,3 +1,11 @@
+netcat-openbsd (1.190-2) UNRELEASED; urgency=low
+
+  * Re-enable usage of '-s' (local source address) and '-p' (local source
+    port) in client mode (when '-l' is unset).  Regression introduced in
+    from a Debian-specificat patch added in 1.187-1.  Closes: #897020.
+
+ -- Guilhem Moulin <guilhem@debian.org>  Fri, 27 Apr 2018 16:34:02 +0200
+
 netcat-openbsd (1.190-1) unstable; urgency=low
 
   * New upstream release (from OpenBSD 6.3)

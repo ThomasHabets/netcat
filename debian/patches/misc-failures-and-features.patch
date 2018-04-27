@@ -295,7 +295,7 @@ Subject: misc failures and features
  		host = argv[0];
 -		uport = argv[1];
 + 		uport = &argv[1];
-+		if (pflag || sflag)
++		if (lflag && (pflag || sflag))
 +			usage(1);
  	} else
  		usage(1);
