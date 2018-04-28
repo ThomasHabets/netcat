@@ -246,7 +246,7 @@ Subject: misc failures and features
  		case 'U':
  			family = AF_UNIX;
  			break;
-@@ -499,31 +511,42 @@ main(int argc, char *argv[])
+@@ -499,31 +511,39 @@ main(int argc, char *argv[])
  # endif
  
  	/* Cruft to make sure options are clean, and used properly. */
@@ -299,12 +299,9 @@ Subject: misc failures and features
 +			errx(1, "cannot use port with -U");
 +		if (!host)
 +			errx(1, "missing socket pathname");
-+	} else {
-+		if (!uport || !*uport)
-+			errx(1, "missing port number");
-+		if (!lflag && !host)
-+			errx(1, "missing destination address");
-+	}
++	} else if (!uport || !*uport)
++		errx(1, "missing port number");
++
 +	if (lflag && zflag)
 +		errx(1, "cannot use -z and -l");
  	if (!lflag && kflag)
