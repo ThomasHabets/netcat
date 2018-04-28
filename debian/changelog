@@ -3,7 +3,7 @@ netcat-openbsd (1.190-2) UNRELEASED; urgency=low
   * d/patches/misc-failures-and-features.patch: Refactor option/argument
     verification logic and re-enable usage of '-s' (local source address) and
     '-p' (local source port) in client mode (when '-l' is unset).  Regression
-    introduced in version 1.187-1 of that file.  Closes: #897020.
+    introduced in version 1.187-1 of that file.  Closes: #897020, LP: #1767283.
   * debian/control: Bump Standards-Version to 4.1.4 (no changes necessary).
 
  -- Guilhem Moulin <guilhem@debian.org>  Fri, 27 Apr 2018 16:34:02 +0200
