@@ -1,4 +1,4 @@
-netcat-openbsd (1.190-2) UNRELEASED; urgency=low
+netcat-openbsd (1.190-2) unstable; urgency=low
 
   * d/patches/misc-failures-and-features.patch: Refactor option/argument
     verification logic and re-enable usage of '-s' (local source address) and
@@ -6,7 +6,7 @@ netcat-openbsd (1.190-2) UNRELEASED; urgency=low
     introduced in version 1.187-1 of that file.  Closes: #897020, LP: #1767283.
   * debian/control: Bump Standards-Version to 4.1.4 (no changes necessary).
 
- -- Guilhem Moulin <guilhem@debian.org>  Fri, 27 Apr 2018 16:34:02 +0200
+ -- Guilhem Moulin <guilhem@debian.org>  Mon, 30 Apr 2018 19:53:34 +0200
 
 netcat-openbsd (1.190-1) unstable; urgency=low
 
