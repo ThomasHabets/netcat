@@ -136,7 +136,7 @@ netcat-openbsd (1.105-6) unstable; urgency=low
 
 netcat-openbsd (1.105-5) unstable; urgency=low
 
-  * Add $LDFLAGS from environment (Closes: #665321). 
+  * Add $LDFLAGS from environment (Closes: #665321).
 
  -- Aron Xu <aron@debian.org>  Mon, 26 Mar 2012 01:37:16 +0800
 
