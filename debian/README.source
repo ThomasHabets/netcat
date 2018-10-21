@@ -1,12 +1,12 @@
 Importing a new upstream release
 
- 1. Download the OpenBSD tarball and verify its integrity
+ 1. Download the OpenBSD tarball and its detached signature
 
    $ OPENBSD_VERSION=6.2
    $ DESTDIR="$XDG_RUNTIME_DIR"
    $ rsync -v rsync://ftp.eu.openbsd.org/OpenBSD/$OPENBSD_VERSION/{src.tar.gz,SHA256.sig} "$DESTDIR"
  
- 2. Verify its integrity (requires signify-openbsd and signify-openbsd-keys packages)
+ 2. Verify its integrity (requires 'signify-openbsd' and 'signify-openbsd-keys' packages)
 
    $ PUBKEY="/usr/share/signify-openbsd-keys/openbsd-${OPENBSD_VERSION//./}-base.pub"
    $ ( cd "$DESTDIR" && signify-openbsd -p "$PUBKEY" -Cx SHA256.sig src.tar.gz )
