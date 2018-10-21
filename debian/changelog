@@ -2,6 +2,13 @@ netcat-openbsd (1.195-1) UNRELEASED; urgency=medium
 
   * New upstream release (from OpenBSD 6.4)
   * debian/control: Bump Standards-Version to 4.2.1 (no changes necessary).
+  * debian/patches:
+    + Move broadcast support out of misc-failures-and-features.patch into
+      an individual patch.
+    + Fix arbitrary port list support (Closes: #886910, regression since
+      1.178-1) and move it into an individual patch.  Furthermore, add range
+      support as well as shuffling in said list, and document these features.
+      (Closes: #886909).
 
  -- Guilhem Moulin <guilhem@debian.org>  Mon, 22 Oct 2018 01:47:05 +0200
 

@@ -3,8 +3,8 @@ Date: Mon, 13 Feb 2012 15:38:15 +0800
 Subject: verbose numeric port
 
 ---
- netcat.c |   22 +++++++++++++++++-----
- 1 file changed, 17 insertions(+), 5 deletions(-)
+ netcat.c |   25 ++++++++++++++++++++-----
+ 1 file changed, 20 insertions(+), 5 deletions(-)
 
 --- a/netcat.c
 +++ b/netcat.c
@@ -16,26 +16,29 @@ Subject: verbose numeric port
  #ifdef __linux__
  # include <linux/in6.h>
  #endif
-@@ -665,6 +666,18 @@ main(int argc, char *argv[])
- 				s = local_listen(host, uport, hints);
+@@ -689,6 +690,21 @@ main(int argc, char *argv[])
+ 			}
  			if (s < 0)
  				err(1, NULL);
 +
-+			char* local;
-+			if (family == AF_INET)
-+				local = "0.0.0.0";
-+			else if (family == AF_INET6)
-+				local = "::";
-+			else
-+				local = "unknown";
-+			fprintf(stderr, "Listening on [%s] (family %d, port %d)\n",
-+				host ?: local,
-+				family,
-+				*uport);
++			if (vflag && (family != AF_UNIX)) {
++				char* local;
++				if (family == AF_INET)
++					local = "0.0.0.0";
++				else if (family == AF_INET6)
++					local = "::";
++				else
++					local = "unknown";
++				fprintf(stderr, "Listening on [%s] (family %d, port %d)\n",
++					host ?: local,
++					family,
++					*uport);
++			}
++
  			if (uflag && kflag) {
  				/*
  				 * For UDP and -k, don't connect the socket,
-@@ -684,20 +697,19 @@ main(int argc, char *argv[])
+@@ -708,20 +724,19 @@ main(int argc, char *argv[])
  				 */
  				int rv;
  				char buf[2048];
