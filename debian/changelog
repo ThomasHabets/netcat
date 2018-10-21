@@ -1,3 +1,9 @@
+netcat-openbsd (1.195-1) UNRELEASED; urgency=medium
+
+  * New upstream release (from OpenBSD 6.4)
+
+ -- Guilhem Moulin <guilhem@debian.org>  Mon, 22 Oct 2018 01:47:05 +0200
+
 netcat-openbsd (1.190-2) unstable; urgency=low
 
   * d/patches/misc-failures-and-features.patch: Refactor option/argument
