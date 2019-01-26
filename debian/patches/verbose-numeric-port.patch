@@ -29,7 +29,7 @@ Subject: verbose numeric port
 +					local = "::";
 +				else
 +					local = "unknown";
-+				fprintf(stderr, "Listening on [%s] (family %d, port %d)\n",
++				fprintf(stderr, "Listening on [%s] (family %d, port %s)\n",
 +					host ?: local,
 +					family,
 +					*uport);
