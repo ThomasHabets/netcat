@@ -3,8 +3,8 @@ Date: Mon, 13 Feb 2012 15:38:15 +0800
 Subject: verbose numeric port
 
 ---
- netcat.c |   25 ++++++++++++++++++++-----
- 1 file changed, 20 insertions(+), 5 deletions(-)
+ netcat.c |   34 ++++++++++++++++++++++++++++------
+ 1 file changed, 28 insertions(+), 6 deletions(-)
 
 --- a/netcat.c
 +++ b/netcat.c
@@ -16,7 +16,7 @@ Subject: verbose numeric port
  #ifdef __linux__
  # include <linux/in6.h>
  #endif
-@@ -210,6 +211,7 @@
+@@ -210,6 +211,7 @@ int	process_tls_opt(char *, int *);
  void	save_peer_cert(struct tls *_tls_ctx, FILE *_fp);
  # endif
  void	report_connect(const struct sockaddr *, socklen_t, char *);
@@ -24,7 +24,7 @@ Subject: verbose numeric port
  # if defined(TLS)
  void	report_tls(struct tls *tls_ctx, char * host);
  # endif
-@@ -708,20 +710,19 @@
+@@ -708,20 +710,19 @@ main(int argc, char *argv[])
  				 */
  				int rv;
  				char buf[2048];
@@ -49,7 +49,7 @@ Subject: verbose numeric port
  
  # if defined(TLS)
  				readwrite(s, NULL);
-@@ -1246,8 +1247,12 @@
+@@ -1246,8 +1247,12 @@ local_listen(const char *host, const cha
  		set_common_sockopts(s, res->ai_family);
  
  		if (bind(s, (struct sockaddr *)res->ai_addr,
@@ -63,7 +63,7 @@ Subject: verbose numeric port
  
  		save_errno = errno;
  		close(s);
-@@ -2036,6 +2041,23 @@
+@@ -2036,6 +2041,23 @@ report_connect(const struct sockaddr *sa
  }
  
  void

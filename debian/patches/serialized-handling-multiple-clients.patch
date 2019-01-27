@@ -3,12 +3,12 @@ Date: Tue, 14 Feb 2012 23:02:00 +0800
 Subject: serialized handling multiple clients
 
 ---
- netcat.c |   44 +++++++++++++++++++++-----------------------
- 1 file changed, 21 insertions(+), 23 deletions(-)
+ netcat.c |   17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
 
 --- a/netcat.c
 +++ b/netcat.c
-@@ -706,7 +706,10 @@
+@@ -706,7 +706,10 @@ main(int argc, char *argv[])
  				s = unix_bind(host, 0);
  			else
  				s = unix_listen(host);
@@ -20,7 +20,7 @@ Subject: serialized handling multiple clients
  
  # if defined(TLS)
  		if (usetls) {
-@@ -720,13 +723,6 @@
+@@ -720,13 +723,6 @@ main(int argc, char *argv[])
  # endif
  		/* Allow only one connection at a time, but stay alive. */
  		for (;;) {
@@ -34,7 +34,7 @@ Subject: serialized handling multiple clients
  			if (uflag && kflag) {
  				/*
  				 * For UDP and -k, don't connect the socket,
-@@ -800,8 +796,11 @@
+@@ -800,8 +796,11 @@ main(int argc, char *argv[])
  					err(1, "connect");
  			}
  
