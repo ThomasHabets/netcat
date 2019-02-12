@@ -1,11 +1,11 @@
-netcat-openbsd (1.195-2) UNRELEASED; urgency=medium
+netcat-openbsd (1.195-2) unstable; urgency=medium
 
   * Report the listening port correctly in verbose mode. Regression since
     1.195-1.  Thanks to Peter Pentchev for the report and patch.
     Closes: #920611.
   * debian/control: Bump Standards-Version to 4.3.0 (no changes necessary).
 
- -- Guilhem Moulin <guilhem@debian.org>  Sun, 27 Jan 2019 13:51:23 +0100
+ -- Guilhem Moulin <guilhem@debian.org>  Tue, 12 Feb 2019 12:31:51 +0100
 
 netcat-openbsd (1.195-1) unstable; urgency=medium
 
