@@ -1,11 +1,11 @@
-netcat-openbsd (1.203-1) UNRELEASED; urgency=medium
+netcat-openbsd (1.203-1) unstable; urgency=medium
 
   * New upstream release (from OpenBSD 6.5)
   * debian/control: Bump Standards-Version to 4.4.0 (no changes necessary).
   * debian/control, debian/compat: Bump debhelper compatibility level from 9
     to 12.
 
- -- Guilhem Moulin <guilhem@debian.org>  Sun, 04 Aug 2019 20:27:15 +0200
+ -- Guilhem Moulin <guilhem@debian.org>  Sun, 04 Aug 2019 20:43:25 +0200
 
 netcat-openbsd (1.195-2) unstable; urgency=medium
 
