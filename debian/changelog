@@ -1,3 +1,9 @@
+netcat-openbsd (1.203-1) UNRELEASED; urgency=medium
+
+  * New upstream release (from OpenBSD 6.5)
+
+ -- Guilhem Moulin <guilhem@debian.org>  Sun, 04 Aug 2019 20:27:15 +0200
+
 netcat-openbsd (1.195-2) unstable; urgency=medium
 
   * Report the listening port correctly in verbose mode. Regression since
