@@ -19,12 +19,12 @@ Subject: verbose numeric port
 @@ -210,6 +211,7 @@ int	process_tls_opt(char *, int *);
  void	save_peer_cert(struct tls *_tls_ctx, FILE *_fp);
  # endif
- void	report_connect(const struct sockaddr *, socklen_t, char *);
+ void	report_sock(const char *, const struct sockaddr *, socklen_t, char *);
 +void	report_listen(const struct sockaddr *, socklen_t, int);
  # if defined(TLS)
  void	report_tls(struct tls *tls_ctx, char * host);
  # endif
-@@ -708,20 +710,19 @@ main(int argc, char *argv[])
+@@ -711,21 +713,20 @@ main(int argc, char *argv[])
  				 */
  				int rv;
  				char buf[2048];
@@ -44,12 +44,13 @@ Subject: verbose numeric port
  					err(1, "connect");
  
  				if (vflag)
--					report_connect((struct sockaddr *)&z, len, NULL);
-+					report_connect((struct sockaddr *)&cliaddr, len, NULL);
+ 					report_sock("Connection received",
+-					    (struct sockaddr *)&z, len, NULL);
++					    (struct sockaddr *)&cliaddr, len, NULL);
  
  # if defined(TLS)
  				readwrite(s, NULL);
-@@ -1246,8 +1247,12 @@ local_listen(const char *host, const cha
+@@ -1258,8 +1259,12 @@ local_listen(const char *host, const cha
  		set_common_sockopts(s, res->ai_family);
  
  		if (bind(s, (struct sockaddr *)res->ai_addr,
@@ -63,7 +64,7 @@ Subject: verbose numeric port
  
  		save_errno = errno;
  		close(s);
-@@ -2036,6 +2041,23 @@ report_connect(const struct sockaddr *sa
+@@ -2056,6 +2061,23 @@ report_sock(const char *msg, const struc
  }
  
  void

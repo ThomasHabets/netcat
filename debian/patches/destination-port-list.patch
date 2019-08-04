@@ -68,7 +68,7 @@ Subject: destination port list
  	struct addrinfo hints;
  	struct servent *sv;
  	socklen_t len;
-@@ -525,11 +525,11 @@ main(int argc, char *argv[])
+@@ -528,11 +528,11 @@ main(int argc, char *argv[])
  	} else if (argv[0] && !argv[1]) {
  		if (!lflag)
  			usage(1);
@@ -82,7 +82,7 @@ Subject: destination port list
  	} else
  		usage(1);
  
-@@ -716,7 +716,7 @@ main(int argc, char *argv[])
+@@ -719,7 +719,7 @@ main(int argc, char *argv[])
  			else
  				s = unix_listen(host);
  		} else
@@ -91,7 +91,7 @@ Subject: destination port list
  		if (s < 0)
  			err(1, NULL);
  
-@@ -1766,57 +1766,61 @@ strtoport(char *portstr, int udp)
+@@ -1790,57 +1790,61 @@ strtoport(char *portstr, int udp)
   * that we should try to connect to.
   */
  void
@@ -109,7 +109,7 @@ Subject: destination port list
 -	if (sv) {
 -		if (asprintf(&portlist[0], "%d", ntohs(sv->s_port)) < 0)
 -			err(1, "asprintf");
--	} else if ((n = strchr(p, '-')) != NULL) {
+-	} else if (isdigit((unsigned char)*p) && (n = strchr(p, '-')) != NULL) {
 -		*n = '\0';
 -		n++;
 -
@@ -138,7 +138,7 @@ Subject: destination port list
 +			if (asprintf(&portlist[x], "%d", ntohs(sv->s_port)) < 0)
 +				err(1, "asprintf");
 +			x++;
-+		} else if ((n = strchr(p[i], '-')) != NULL) {
++		} else if (isdigit((unsigned char)*p[i]) && (n = strchr(p[i], '-')) != NULL) {
 +			*n = '\0';
 +			n++;
 +

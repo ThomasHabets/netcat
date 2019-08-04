@@ -89,7 +89,7 @@ Subject: misc failures and features
  .Fl uz
 --- a/netcat.c
 +++ b/netcat.c
-@@ -98,6 +98,7 @@
+@@ -99,6 +99,7 @@
  #include <netdb.h>
  #include <poll.h>
  #include <signal.h>
@@ -109,7 +109,7 @@ Subject: misc failures and features
  	char *proxy = NULL, *proxyport = NULL;
  	const char *errstr;
  	struct addrinfo proxyhints;
-@@ -939,6 +943,8 @@ unix_bind(char *path, int flags)
+@@ -946,6 +950,8 @@ unix_bind(char *path, int flags)
  	    0)) < 0)
  		return -1;
  
@@ -118,7 +118,7 @@ Subject: misc failures and features
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
  	s_un.sun_family = AF_UNIX;
  
-@@ -1062,8 +1068,10 @@ unix_connect(char *path)
+@@ -1071,8 +1077,10 @@ unix_connect(char *path)
  		if ((s = unix_bind(unix_dg_tmp_socket, SOCK_CLOEXEC)) < 0)
  			return -1;
  	} else {
@@ -130,7 +130,7 @@ Subject: misc failures and features
  	}
  
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
-@@ -1073,10 +1081,12 @@ unix_connect(char *path)
+@@ -1082,10 +1090,12 @@ unix_connect(char *path)
  	    sizeof(s_un.sun_path)) {
  		close(s);
  		errno = ENAMETOOLONG;
