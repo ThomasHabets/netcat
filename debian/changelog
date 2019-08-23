@@ -1,3 +1,11 @@
+netcat-openbsd (1.203-2) unstable; urgency=medium
+
+  * Remove d/patches/verbose-numeric-port.patch: as of 1.203 verbose mode for
+    listening sockets is included in upstream's report_sock() function.
+    (Closes: #934330)
+
+ -- Guilhem Moulin <guilhem@debian.org>  Fri, 23 Aug 2019 22:59:19 +0200
+
 netcat-openbsd (1.203-1) unstable; urgency=medium
 
   * New upstream release (from OpenBSD 6.5)

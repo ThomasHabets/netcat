@@ -43,7 +43,7 @@ Subject: use -s/-p flags to specify listen address
  Change the IPv4 TOS/IPv6 traffic class value.
 --- a/netcat.c
 +++ b/netcat.c
-@@ -511,31 +511,40 @@ main(int argc, char *argv[])
+@@ -509,31 +509,40 @@ main(int argc, char *argv[])
  # endif
  
  	/* Cruft to make sure options are clean, and used properly. */
