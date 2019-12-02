@@ -79,7 +79,7 @@ Subject: send crlf
  # endif
  		case 'd':
  			dflag = 1;
-@@ -1323,12 +1329,6 @@ readwrite(int net_fd)
+@@ -1324,12 +1330,6 @@ readwrite(int net_fd)
  		    stdinbufpos == 0 && netinbufpos == 0)
  			return;
  
@@ -92,7 +92,7 @@ Subject: send crlf
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
  
-@@ -1408,7 +1408,7 @@ readwrite(int net_fd)
+@@ -1409,7 +1409,7 @@ readwrite(int net_fd)
  				pfd[POLL_NETOUT].events = POLLOUT;
  			else
  # else
@@ -101,7 +101,7 @@ Subject: send crlf
  # endif
  			if (ret == -1)
  				pfd[POLL_NETOUT].fd = -1;
-@@ -1467,7 +1467,7 @@ readwrite(int net_fd)
+@@ -1468,7 +1468,7 @@ readwrite(int net_fd)
  				pfd[POLL_STDOUT].events = POLLOUT;
  			else
  # else
@@ -110,7 +110,7 @@ Subject: send crlf
  # endif
  			if (ret == -1)
  				pfd[POLL_STDOUT].fd = -1;
-@@ -1493,33 +1493,40 @@ readwrite(int net_fd)
+@@ -1494,33 +1494,40 @@ readwrite(int net_fd)
  }
  
  ssize_t
@@ -173,7 +173,7 @@ Subject: send crlf
  	/* adjust buffer */
  	adjust = *bufpos - n;
  	if (adjust > 0)
-@@ -2029,6 +2036,7 @@ help(void)
+@@ -2030,6 +2037,7 @@ help(void)
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
  	\t-6		Use IPv6\n\
@@ -181,7 +181,7 @@ Subject: send crlf
  	\t-D		Enable the debug socket option\n\
  	\t-d		Detach from stdin\n\
  	\t-F		Pass socket fd\n\
-@@ -2066,7 +2074,7 @@ void
+@@ -2067,7 +2075,7 @@ void
  usage(int ret)
  {
  	fprintf(stderr,

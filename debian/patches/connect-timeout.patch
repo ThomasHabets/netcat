@@ -37,7 +37,7 @@ Subject: connect timeout
  int
  main(int argc, char *argv[])
  {
-@@ -1078,11 +1086,14 @@ remote_connect(const char *host, const c
+@@ -1079,11 +1087,14 @@ remote_connect(const char *host, const c
  
  		set_common_sockopts(s, res->ai_family);
  
@@ -54,7 +54,7 @@ Subject: connect timeout
  
  		save_errno = errno;
  		close(s);
-@@ -1123,6 +1134,69 @@ timeout_connect(int s, const struct sock
+@@ -1124,6 +1135,69 @@ timeout_connect(int s, const struct sock
  	return ret;
  }
  

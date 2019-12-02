@@ -6,8 +6,8 @@ Subject: port to linux with libsd
  Makefile |   15 ++++++-
  nc.1     |    3 -
  netcat.c |  131 ++++++++++++++++++++++++++++++++++++++++++++++++---------------
- socks.c  |   46 +++++++++++-----------
- 4 files changed, 139 insertions(+), 56 deletions(-)
+ socks.c  |   48 +++++++++++------------
+ 4 files changed, 140 insertions(+), 57 deletions(-)
 
 --- a/Makefile
 +++ b/Makefile
@@ -170,7 +170,7 @@ Subject: port to linux with libsd
  	} else if (argv[0] && !argv[1]) {
  		if (!lflag)
  			usage(1);
-@@ -388,33 +452,6 @@ main(int argc, char *argv[])
+@@ -389,33 +453,6 @@ main(int argc, char *argv[])
  		}
  	}
  
@@ -204,7 +204,7 @@ Subject: port to linux with libsd
  	if (!lflag && kflag)
  		errx(1, "must use -l with -k");
  	if (uflag && usetls)
-@@ -449,8 +486,8 @@ main(int argc, char *argv[])
+@@ -450,8 +487,8 @@ main(int argc, char *argv[])
  		} else {
  			strlcpy(unix_dg_tmp_socket_buf, "/tmp/nc.XXXXXXXXXX",
  			    UNIX_DG_TMP_SOCKET_SIZE);
@@ -215,7 +215,7 @@ Subject: port to linux with libsd
  			unix_dg_tmp_socket = unix_dg_tmp_socket_buf;
  		}
  	}
-@@ -933,8 +970,10 @@ remote_connect(const char *host, const c
+@@ -934,8 +971,10 @@ remote_connect(const char *host, const c
  		if (sflag || pflag) {
  			struct addrinfo ahints, *ares;
  
@@ -226,8 +226,8 @@ Subject: port to linux with libsd
  			memset(&ahints, 0, sizeof(struct addrinfo));
  			ahints.ai_family = res->ai_family;
  			ahints.ai_socktype = uflag ? SOCK_DGRAM : SOCK_STREAM;
-@@ -1026,9 +1065,15 @@ local_listen(const char *host, const cha
- 		    res->ai_protocol)) < 0)
+@@ -1027,9 +1066,15 @@ local_listen(const char *host, const cha
+ 		    res->ai_protocol)) == -1)
  			continue;
  
 +		ret = setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &x, sizeof(x));
@@ -242,7 +242,7 @@ Subject: port to linux with libsd
  
  		set_common_sockopts(s, res->ai_family);
  
-@@ -1498,11 +1543,13 @@ set_common_sockopts(int s, int af)
+@@ -1499,11 +1544,13 @@ set_common_sockopts(int s, int af)
  {
  	int x = 1;
  
@@ -256,7 +256,7 @@ Subject: port to linux with libsd
  	if (Dflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_DEBUG,
  			&x, sizeof(x)) == -1)
-@@ -1513,9 +1560,14 @@ set_common_sockopts(int s, int af)
+@@ -1514,9 +1561,14 @@ set_common_sockopts(int s, int af)
  		    IP_TOS, &Tflag, sizeof(Tflag)) == -1)
  			err(1, "set IP ToS");
  
@@ -271,7 +271,7 @@ Subject: port to linux with libsd
  	}
  	if (Iflag) {
  		if (setsockopt(s, SOL_SOCKET, SO_RCVBUF,
-@@ -1533,19 +1585,34 @@ set_common_sockopts(int s, int af)
+@@ -1534,19 +1586,34 @@ set_common_sockopts(int s, int af)
  		    IP_TTL, &ttl, sizeof(ttl)))
  			err(1, "set IP TTL");
  
@@ -306,7 +306,7 @@ Subject: port to linux with libsd
  	}
  }
  
-@@ -1580,6 +1647,7 @@ process_tos_opt(char *s, int *val)
+@@ -1581,6 +1648,7 @@ process_tos_opt(char *s, int *val)
  		{ "cs7",		IPTOS_DSCP_CS7 },
  		{ "ef",			IPTOS_DSCP_EF },
  		{ "inetcontrol",	IPTOS_PREC_INTERNETCONTROL },
@@ -314,7 +314,7 @@ Subject: port to linux with libsd
  		{ "lowdelay",		IPTOS_LOWDELAY },
  		{ "netcontrol",		IPTOS_PREC_NETCONTROL },
  		{ "reliability",	IPTOS_RELIABILITY },
-@@ -1741,6 +1809,9 @@ report_sock(const char *msg, const struc
+@@ -1742,6 +1810,9 @@ report_sock(const char *msg, const struc
  void
  help(void)
  {
@@ -324,7 +324,7 @@ Subject: port to linux with libsd
  	usage(0);
  	fprintf(stderr, "\tCommand Summary:\n\
  	\t-4		Use IPv4\n\
-@@ -1783,7 +1854,7 @@ help(void)
+@@ -1784,7 +1855,7 @@ help(void)
  	\t-Z		Peer certificate file\n\
  	\t-z		Zero-I/O mode [used for scanning]\n\
  	Port numbers can be individual or ranges: lo-hi [inclusive]\n");
@@ -415,7 +415,7 @@ Subject: port to linux with libsd
  			    "CONNECT %s:%d HTTP/1.0\r\n",
  			    host, ntohs(serverport));
  		}
- 		if (r == -1 || (size_t)r >= sizeof(buf))
+ 		if (r < 0 || (size_t)r >= sizeof(buf))
  			errx(1, "hostname too long");
 -		r = strlen(buf);
 +		r = strlen((char*)buf);
@@ -443,7 +443,7 @@ Subject: port to linux with libsd
 -			r = snprintf(buf, sizeof(buf), "Proxy-Authorization: "
 +			r = snprintf((char*)buf, sizeof(buf), "Proxy-Authorization: "
  			    "Basic %s\r\n", resp);
- 			if (r == -1 || (size_t)r >= sizeof(buf))
+ 			if (r < 0 || (size_t)r >= sizeof(buf))
  				errx(1, "Proxy auth response too long");
 -			r = strlen(buf);
 +			r = strlen((char*)buf);
@@ -453,15 +453,17 @@ Subject: port to linux with libsd
  			explicit_bzero(proxypass, sizeof proxypass);
  			explicit_bzero(buf, sizeof buf);
  		}
-@@ -371,22 +371,22 @@ socks_connect(const char *host, const ch
+@@ -371,23 +371,23 @@ socks_connect(const char *host, const ch
  			err(1, "write failed (%zu/2)", cnt);
  
  		/* Read status reply */
 -		proxy_read_line(proxyfd, buf, sizeof(buf));
 +		proxy_read_line(proxyfd, (char*)buf, sizeof(buf));
  		if (proxyuser != NULL &&
--		    strncmp(buf, "HTTP/1.0 407 ", 12) == 0) {
-+		    strncmp((char*)buf, "HTTP/1.0 407 ", 12) == 0) {
+-		    (strncmp(buf, "HTTP/1.0 407 ", 12) == 0 ||
+-		    strncmp(buf, "HTTP/1.1 407 ", 12) == 0)) {
++		    (strncmp((char*)buf, "HTTP/1.0 407 ", 12) == 0 ||
++		    strncmp((char*)buf, "HTTP/1.1 407 ", 12) == 0)) {
  			if (authretry > 1) {
  				fprintf(stderr, "Proxy authentication "
  				    "failed\n");

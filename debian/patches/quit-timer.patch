@@ -78,7 +78,7 @@ Subject: quit timer
  # if defined(TLS)
  		case 'R':
  			tls_cachanged = 1;
-@@ -1319,15 +1329,27 @@ readwrite(int net_fd)
+@@ -1320,15 +1330,27 @@ readwrite(int net_fd)
  	while (1) {
  		/* both inputs are gone, buffers are empty, we are done */
  		if (pfd[POLL_STDIN].fd == -1 && pfd[POLL_NETIN].fd == -1 &&
@@ -112,7 +112,7 @@ Subject: quit timer
  
  		/* poll */
  		num_fds = poll(pfd, 4, timeout);
-@@ -2052,6 +2074,7 @@ help(void)
+@@ -2053,6 +2075,7 @@ help(void)
  	\t-O length	TCP send buffer length\n\
  	\t-P proxyuser\tUsername for proxy authentication\n\
  	\t-p port\t	Specify local port for remote connects\n\
@@ -120,7 +120,7 @@ Subject: quit timer
  	\t-r		Randomize remote ports\n\
  	\t-S		Enable the TCP MD5 signature option\n\
  	\t-s source	Local source address\n\
-@@ -2076,10 +2099,19 @@ usage(int ret)
+@@ -2077,10 +2100,19 @@ usage(int ret)
  	fprintf(stderr,
  	    "usage: nc [-46CDdFhklNnrStUuvz] [-I length] [-i interval] [-M ttl]\n"
  	    "\t  [-m minttl] [-O length] [-P proxy_username] [-p source_port]\n"
