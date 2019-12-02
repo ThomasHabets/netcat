@@ -1,3 +1,12 @@
+netcat-openbsd (1.206-1) UNRELEASED; urgency=medium
+
+  * d/patches/use-flags-to-specify-listen-address.patch: Re-enable specifying
+    client socket for UNIX-domain datagram sockets.  Regression introduced in
+    version 1.187-1.  Thanks to astian for the report and patch.
+    (Closes: #935650)
+
+ -- Guilhem Moulin <guilhem@debian.org>  Mon, 02 Dec 2019 16:31:18 +0100
+
 netcat-openbsd (1.203-2) unstable; urgency=medium
 
   * Remove d/patches/verbose-numeric-port.patch: as of 1.203 verbose mode for

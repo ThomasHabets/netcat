@@ -4,8 +4,8 @@ Subject: use -s/-p flags to specify listen address
 
 ---
  nc.1     |   18 ++++++++++++++----
- netcat.c |   49 +++++++++++++++++++++++++++++--------------------
- 2 files changed, 43 insertions(+), 24 deletions(-)
+ netcat.c |   51 +++++++++++++++++++++++++++++++--------------------
+ 2 files changed, 45 insertions(+), 24 deletions(-)
 
 --- a/nc.1
 +++ b/nc.1
@@ -43,7 +43,7 @@ Subject: use -s/-p flags to specify listen address
  Change the IPv4 TOS/IPv6 traffic class value.
 --- a/netcat.c
 +++ b/netcat.c
-@@ -509,31 +509,40 @@ main(int argc, char *argv[])
+@@ -509,31 +509,42 @@ main(int argc, char *argv[])
  # endif
  
  	/* Cruft to make sure options are clean, and used properly. */
@@ -70,7 +70,9 @@ Subject: use -s/-p flags to specify listen address
 +	if (argc == 0 && lflag) {
 +		uport = &pflag;
 +		host = sflag;
-+	} else if (argc == 1 && !pflag && !sflag) {
++	} else if (argc == 1 && !pflag &&
++			/* `nc -l 12345` or `nc -U bar` or `nc -uU -s foo bar` */
++			(!sflag || (family == AF_UNIX && uflag && !lflag))) {
 +		if (family == AF_UNIX) {
 +			host = argv[0];
 +			uport = NULL;

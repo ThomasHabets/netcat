@@ -109,7 +109,7 @@ Subject: misc failures and features
  	char *proxy = NULL, *proxyport = NULL;
  	const char *errstr;
  	struct addrinfo proxyhints;
-@@ -946,6 +950,8 @@ unix_bind(char *path, int flags)
+@@ -948,6 +952,8 @@ unix_bind(char *path, int flags)
  	    0)) == -1)
  		return -1;
  
@@ -118,7 +118,7 @@ Subject: misc failures and features
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
  	s_un.sun_family = AF_UNIX;
  
-@@ -1071,8 +1077,10 @@ unix_connect(char *path)
+@@ -1073,8 +1079,10 @@ unix_connect(char *path)
  		if ((s = unix_bind(unix_dg_tmp_socket, SOCK_CLOEXEC)) == -1)
  			return -1;
  	} else {
@@ -130,7 +130,7 @@ Subject: misc failures and features
  	}
  
  	memset(&s_un, 0, sizeof(struct sockaddr_un));
-@@ -1082,10 +1090,12 @@ unix_connect(char *path)
+@@ -1084,10 +1092,12 @@ unix_connect(char *path)
  	    sizeof(s_un.sun_path)) {
  		close(s);
  		errno = ENAMETOOLONG;
