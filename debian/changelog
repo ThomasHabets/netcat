@@ -1,12 +1,13 @@
-netcat-openbsd (1.206-1) UNRELEASED; urgency=medium
+netcat-openbsd (1.206-1) unstable; urgency=medium
 
+  * New upstream release (from OpenBSD 6.6)
   * d/patches/use-flags-to-specify-listen-address.patch: Re-enable specifying
     client socket for UNIX-domain datagram sockets.  Regression introduced in
     version 1.187-1.  Thanks to astian for the report and patch.
     (Closes: #935650)
   * debian/control: Bump Standards-Version to 4.4.1 (no changes necessary).
 
- -- Guilhem Moulin <guilhem@debian.org>  Mon, 02 Dec 2019 15:23:21 +0100
+ -- Guilhem Moulin <guilhem@debian.org>  Mon, 02 Dec 2019 17:10:23 +0100
 
 netcat-openbsd (1.203-2) unstable; urgency=medium
 
