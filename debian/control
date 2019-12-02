@@ -3,7 +3,7 @@ Section: net
 Priority: important
 Maintainer: Aron Xu <aron@debian.org>
 Uploaders: Guilhem Moulin <guilhem@debian.org>
-Standards-Version: 4.4.0
+Standards-Version: 4.4.1
 Build-Depends: debhelper (>= 12~), libbsd-dev, pkg-config, quilt
 Vcs-Git: https://salsa.debian.org/debian/netcat-openbsd.git
 Vcs-Browser: https://salsa.debian.org/debian/netcat-openbsd
