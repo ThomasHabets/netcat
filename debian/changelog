@@ -1,6 +1,7 @@
 netcat-openbsd (1.206-2) UNRELEASED; urgency=medium
 
   * d/control, d/compat: Set debhelper-compat version in Build-Depends.
+  * d/copyright: Set fields Upstream-Name.
 
  -- Guilhem Moulin <guilhem@debian.org>  Mon, 09 Dec 2019 00:23:33 +0100
 

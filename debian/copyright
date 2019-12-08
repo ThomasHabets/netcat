@@ -1,5 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Source: http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/nc/
+Upstream-Name: netcat
 
 Files: netcat.c
 Copyright: 2001 Eric Jackson <ericj@monkey.org>
