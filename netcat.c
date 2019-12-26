@@ -1912,7 +1912,7 @@ set_common_sockopts(int s, const struct sockaddr* sa)
 		sig.tcpm_keylen = TCP_MD5SIG_MAXKEYLEN < strlen(Sflag_password)
 			? TCP_MD5SIG_MAXKEYLEN
 			: strlen(Sflag_password);
-		strlcpy(sig.tcpm_key, Sflag_password, sig.tcpm_keylen);
+		memcpy(sig.tcpm_key, Sflag_password, sig.tcpm_keylen);
 		if (setsockopt(s, IPPROTO_TCP, TCP_MD5SIG,
 			&sig, sizeof(sig)) == -1)
 			err(1, NULL);
