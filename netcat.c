@@ -46,7 +46,7 @@
 #ifdef __linux__
 # include <linux/in6.h>
 #endif
-#if defined(TCP_MD5SIG) && defined(TCP_MD5SIG_MAXKEYLEN)
+#if defined(TCP_MD5SIG_EXT) && defined(TCP_MD5SIG_MAXKEYLEN)
 # include <bsd/readpassphrase.h>
 #endif
 
@@ -179,7 +179,7 @@ FILE	*Zflag;					/* file to save peer cert */
 int	Cflag = 0;			/* CRLF line-ending */
 # endif
 
-# if defined(TCP_MD5SIG) && defined(TCP_MD5SIG_MAXKEYLEN)
+# if defined(TCP_MD5SIG_EXT) && defined(TCP_MD5SIG_MAXKEYLEN)
 char Sflag_password[TCP_MD5SIG_MAXKEYLEN];
 # endif
 int recvcount, recvlimit;
@@ -468,7 +468,7 @@ main(int argc, char *argv[])
 			break;
 # endif
 		case 'S':
-# if defined(TCP_MD5SIG) && defined(TCP_MD5SIG_MAXKEYLEN)
+# if defined(TCP_MD5SIG_EXT) && defined(TCP_MD5SIG_MAXKEYLEN)
 			if (readpassphrase("TCP MD5SIG password: ",
 			                   Sflag_password, TCP_MD5SIG_MAXKEYLEN, RPP_REQUIRE_TTY) == NULL)
 				errx(1, "Unable to read TCP MD5SIG password");
@@ -1904,7 +1904,7 @@ set_common_sockopts(int s, const struct sockaddr* sa)
 			err(1, NULL);
 	}
 # endif
-# if defined(TCP_MD5SIG) && defined(TCP_MD5SIG_MAXKEYLEN)
+# if defined(TCP_MD5SIG_EXT) && defined(TCP_MD5SIG_MAXKEYLEN)
 	if (Sflag) {
 		struct tcp_md5sig sig;
 		memset(&sig, 0, sizeof(sig));
@@ -1913,7 +1913,8 @@ set_common_sockopts(int s, const struct sockaddr* sa)
 			? TCP_MD5SIG_MAXKEYLEN
 			: strlen(Sflag_password);
 		memcpy(sig.tcpm_key, Sflag_password, sig.tcpm_keylen);
-		if (setsockopt(s, IPPROTO_TCP, TCP_MD5SIG,
+		sig.tcpm_flags = TCP_MD5SIG_FLAG_PREFIX;
+		if (setsockopt(s, IPPROTO_TCP, TCP_MD5SIG_EXT,
 			&sig, sizeof(sig)) == -1)
 			err(1, NULL);
 	}
